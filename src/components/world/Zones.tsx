@@ -1,3 +1,4 @@
+import React from "react";
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -189,7 +190,7 @@ export function Projects() {
 export function Mountain() {
   const base = ZONES_LOCAL.mountain;
   const layers = 10;
-  const blocks: JSX.Element[] = [];
+  const blocks: React.ReactElement[] = [];
   for (let y = 0; y < layers; y++) {
     const w = layers - y;
     for (let x = -w; x <= w; x++) {
@@ -227,7 +228,7 @@ export function ContactPortal() {
   });
 
   // Frame around portal
-  const frame: JSX.Element[] = [];
+  const frame: React.ReactElement[] = [];
   for (let y = 0; y < 5; y++) {
     for (let x = -2; x <= 2; x++) {
       if (y === 0 || y === 4 || x === -2 || x === 2) {
