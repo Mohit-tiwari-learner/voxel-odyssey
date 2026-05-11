@@ -1,0 +1,317 @@
+import { useRef, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+import { Text, Float, Sparkles } from "@react-three/drei";
+import { useGame } from "@/store/game";
+
+/* Tiny helper: a stack of voxel blocks */
+function Block({ position, color, size = 1, emissive }: { position: [number, number, number]; color: string; size?: number; emissive?: string }) {
+  return (
+    <mesh position={position} castShadow receiveShadow>
+      <boxGeometry args={[size, size, size]} />
+      <meshLambertMaterial color={color} emissive={emissive ?? "#000"} emissiveIntensity={emissive ? 0.6 : 0} />
+    </mesh>
+  );
+}
+
+/* Floating label above a zone */
+function ZoneLabel({ position, color, children }: { position: [number, number, number]; color: string; children: string }) {
+  const ref = useRef<THREE.Group>(null);
+  useFrame((s) => {
+    if (ref.current) ref.current.position.y = position[1] + Math.sin(s.clock.elapsedTime * 1.5) * 0.4;
+  });
+  return (
+    <group ref={ref} position={position}>
+      <Text fontSize={1.6} color={color} outlineColor="#000" outlineWidth={0.08} anchorX="center" anchorY="middle">
+        {children}
+      </Text>
+    </group>
+  );
+}
+
+/* SPAWN AREA — floating logo + portal beacons toward zones */
+export function SpawnArea() {
+  return (
+    <group>
+      <Float speed={1.2} rotationIntensity={0.15} floatIntensity={0.6}>
+        <group position={[0, 10, -6]}>
+          {/* Pixel "P" logo */}
+          {[
+            [0,2],[0,1],[0,0],[0,-1],[0,-2],[1,2],[2,2],[2,1],[1,0],
+          ].map(([x,y],i)=>(
+            <Block key={i} position={[x*1.1, y*1.1, 0]} color="#f6c453" emissive="#f6c453" />
+          ))}
+        </group>
+      </Float>
+      <ZoneLabel position={[0, 7, 0]} color="#f6c453">PORTFOLIO</ZoneLabel>
+      <Sparkles count={60} scale={[20, 6, 20]} size={3} color="#fff5c2" speed={0.4} position={[0, 4, 0]} />
+      {/* NPC robot guide */}
+      <group position={[3, 2.5, 6]}>
+        <Block position={[0,1,0]} color="#bbbec4" />
+        <Block position={[0,0,0]} color="#7c8087" />
+        <Block position={[-0.6,0.9,0.51]} color="#42e2f5" emissive="#42e2f5" size={0.2} />
+        <Block position={[0.6,0.9,0.51]} color="#42e2f5" emissive="#42e2f5" size={0.2} />
+      </group>
+    </group>
+  );
+}
+
+/* VILLAGE — small house */
+export function Village() {
+  const base = ZONES_LOCAL.village;
+  return (
+    <group position={base}>
+      {/* House walls */}
+      {Array.from({ length: 6 }).map((_, x) =>
+        Array.from({ length: 4 }).map((_, y) => (
+          <Block key={`w-${x}-${y}`} position={[x - 3, y + 1, -2]} color={x === 2 || x === 3 ? "#3a2a1d" : "#caa472"} />
+        ))
+      )}
+      {/* Roof */}
+      {Array.from({ length: 7 }).map((_, x) => (
+        <Block key={`r-${x}`} position={[x - 3.5, 5, -2]} color="#7a2e2e" />
+      ))}
+      {/* Bookshelf inside */}
+      <Block position={[-2, 1, -1]} color="#5a3a1d" />
+      <Block position={[-2, 2, -1]} color="#5a3a1d" />
+      {/* Sign */}
+      <Block position={[0, 1, 2]} color="#3a2a1d" size={0.8} />
+      <Float floatIntensity={0.6}>
+        <Text position={[0, 3, 2]} fontSize={0.7} color="#fff" outlineColor="#000" outlineWidth={0.05}>
+          ABOUT ME
+        </Text>
+      </Float>
+      <ZoneLabel position={[0, 8, 0]} color="#8ecae6">ABOUT VILLAGE</ZoneLabel>
+    </group>
+  );
+}
+
+/* FACTORY — animated machines */
+export function Factory() {
+  const base = ZONES_LOCAL.factory;
+  const skills = ["React", "Node.js", "Python", "Three.js", "AI/ML", "Mongo"];
+  return (
+    <group position={base}>
+      {skills.map((s, i) => {
+        const angle = (i / skills.length) * Math.PI * 2;
+        const r = 6;
+        const x = Math.cos(angle) * r;
+        const z = Math.sin(angle) * r;
+        return <Machine key={s} label={s} position={[x, 1, z]} hue={i / skills.length} />;
+      })}
+      {/* Central core */}
+      <CoreOrb position={[0, 4, 0]} />
+      <ZoneLabel position={[0, 10, 0]} color="#fb8500">SKILLS FACTORY</ZoneLabel>
+    </group>
+  );
+}
+
+function Machine({ position, label, hue }: { position: [number, number, number]; label: string; hue: number }) {
+  const ref = useRef<THREE.Mesh>(null);
+  const color = useMemo(() => new THREE.Color().setHSL(hue * 0.85, 0.7, 0.55).getStyle(), [hue]);
+  useFrame((s) => {
+    if (ref.current) ref.current.rotation.y = s.clock.elapsedTime * (0.6 + hue);
+  });
+  return (
+    <group position={position}>
+      <mesh position={[0, 0, 0]} castShadow>
+        <boxGeometry args={[2, 2, 2]} />
+        <meshLambertMaterial color="#3a3f48" />
+      </mesh>
+      <mesh ref={ref} position={[0, 2, 0]} castShadow>
+        <boxGeometry args={[1.2, 1.2, 1.2]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.8} metalness={0.3} roughness={0.4} />
+      </mesh>
+      <Float floatIntensity={0.4} speed={2}>
+        <Text position={[0, 4.3, 0]} fontSize={0.5} color={color} outlineColor="#000" outlineWidth={0.04}>
+          {label}
+        </Text>
+      </Float>
+      <Sparkles count={12} scale={[2, 3, 2]} size={2} color={color} speed={1.5} position={[0, 2, 0]} />
+    </group>
+  );
+}
+
+function CoreOrb({ position }: { position: [number, number, number] }) {
+  const ref = useRef<THREE.Mesh>(null);
+  useFrame((s) => {
+    if (ref.current) {
+      ref.current.rotation.x = s.clock.elapsedTime * 0.4;
+      ref.current.rotation.y = s.clock.elapsedTime * 0.6;
+      const sc = 1 + Math.sin(s.clock.elapsedTime * 2) * 0.05;
+      ref.current.scale.setScalar(sc);
+    }
+  });
+  return (
+    <mesh ref={ref} position={position}>
+      <octahedronGeometry args={[1.5, 0]} />
+      <meshStandardMaterial color="#fb8500" emissive="#fb8500" emissiveIntensity={1.2} />
+    </mesh>
+  );
+}
+
+/* PROJECTS BIOME — voxel dungeons */
+export function Projects() {
+  const base = ZONES_LOCAL.projects;
+  const projects = [
+    { name: "AI Lab",      color: "#42e2f5" },
+    { name: "Web City",    color: "#ffafcc" },
+    { name: "Data Towers", color: "#bde0fe" },
+    { name: "Game Arena",  color: "#fdc500" },
+  ];
+  return (
+    <group position={base}>
+      {projects.map((p, i) => {
+        const x = (i - 1.5) * 7;
+        return (
+          <group key={p.name} position={[x, 0, 0]}>
+            {/* Pedestal */}
+            <Block position={[0, 1, 0]} color="#2c2f36" size={3} />
+            {/* Tower */}
+            {Array.from({ length: 5 }).map((_, y) => (
+              <Block key={y} position={[0, 3 + y, 0]} color={p.color} emissive={p.color} />
+            ))}
+            <Float floatIntensity={0.5} speed={1.5}>
+              <Text position={[0, 10, 0]} fontSize={0.7} color={p.color} outlineColor="#000" outlineWidth={0.05}>
+                {p.name}
+              </Text>
+            </Float>
+            <Sparkles count={20} scale={[3, 6, 3]} size={2} color={p.color} speed={1} position={[0, 5, 0]} />
+          </group>
+        );
+      })}
+      <ZoneLabel position={[0, 14, 0]} color="#a663cc">PROJECTS BIOME</ZoneLabel>
+    </group>
+  );
+}
+
+/* MOUNTAIN — voxel pyramid + checkpoints */
+export function Mountain() {
+  const base = ZONES_LOCAL.mountain;
+  const layers = 10;
+  const blocks: JSX.Element[] = [];
+  for (let y = 0; y < layers; y++) {
+    const w = layers - y;
+    for (let x = -w; x <= w; x++) {
+      for (let z = -w; z <= w; z++) {
+        if (Math.abs(x) === w || Math.abs(z) === w || y === layers - 1) {
+          const c = y > 7 ? "#eef4ff" : y > 4 ? "#7c8087" : "#5a4632";
+          blocks.push(<Block key={`${x}-${y}-${z}`} position={[x, y + 1, z]} color={c} />);
+        }
+      }
+    }
+  }
+  return (
+    <group position={base}>
+      {blocks}
+      <Float floatIntensity={1} speed={1}>
+        <Text position={[0, layers + 4, 0]} fontSize={1.2} color="#fff5c2" outlineColor="#000" outlineWidth={0.06}>
+          EXPERIENCE
+        </Text>
+      </Float>
+      <Sparkles count={40} scale={[10, 12, 10]} size={3} color="#fff5c2" speed={0.6} position={[0, layers, 0]} />
+      <ZoneLabel position={[0, layers + 8, 0]} color="#cdb4db">EXPERIENCE PEAK</ZoneLabel>
+    </group>
+  );
+}
+
+/* PORTAL — ring of obsidian + animated portal plane */
+export function ContactPortal() {
+  const base = ZONES_LOCAL.portal;
+  const portalRef = useRef<THREE.Mesh>(null);
+  useFrame((s) => {
+    if (portalRef.current) {
+      const m = portalRef.current.material as THREE.ShaderMaterial;
+      m.uniforms.uTime.value = s.clock.elapsedTime;
+    }
+  });
+
+  // Frame around portal
+  const frame: JSX.Element[] = [];
+  for (let y = 0; y < 5; y++) {
+    for (let x = -2; x <= 2; x++) {
+      if (y === 0 || y === 4 || x === -2 || x === 2) {
+        frame.push(<Block key={`f-${x}-${y}`} position={[x, y + 1, 0]} color="#1c0a2e" emissive="#3a0ca3" />);
+      }
+    }
+  }
+
+  const shader = useMemo(() => ({
+    uniforms: { uTime: { value: 0 } },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      uniform float uTime;
+      // Simple swirling portal
+      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+      float noise(vec2 p){
+        vec2 i = floor(p), f = fract(p);
+        float a = hash(i), b = hash(i+vec2(1,0)), c = hash(i+vec2(0,1)), d = hash(i+vec2(1,1));
+        vec2 u = f*f*(3.0-2.0*f);
+        return mix(mix(a,b,u.x), mix(c,d,u.x), u.y);
+      }
+      void main(){
+        vec2 uv = vUv - 0.5;
+        float a = atan(uv.y, uv.x);
+        float r = length(uv);
+        float n = noise(vec2(a*3.0 + uTime*0.6, r*8.0 - uTime*1.2));
+        vec3 col = mix(vec3(0.45,0.1,0.7), vec3(0.1,0.85,1.0), n);
+        col += pow(1.0 - r*1.8, 3.0) * vec3(1.0, 0.8, 1.0);
+        float alpha = smoothstep(0.5, 0.2, r);
+        gl_FragColor = vec4(col, alpha);
+      }
+    `,
+    transparent: true,
+  }), []);
+
+  return (
+    <group position={base}>
+      {frame}
+      <mesh ref={portalRef} position={[0, 3, 0.1]}>
+        <planeGeometry args={[3.6, 4.2]} />
+        <shaderMaterial args={[shader]} />
+      </mesh>
+      <Sparkles count={50} scale={[6, 8, 2]} size={3} color="#c77dff" speed={1.2} position={[0, 3, 0]} />
+      <ZoneLabel position={[0, 9, 0]} color="#c77dff">CONTACT PORTAL</ZoneLabel>
+    </group>
+  );
+}
+
+import { ZONES } from "@/store/game";
+const ZONES_LOCAL = {
+  village: ZONES.village.position,
+  factory: ZONES.factory.position,
+  projects: ZONES.projects.position,
+  mountain: ZONES.mountain.position,
+  portal: ZONES.portal.position,
+} as const;
+
+/* TREES — scattered voxel trees */
+export function Trees() {
+  const trees = useMemo(() => {
+    const arr: { x: number; z: number }[] = [];
+    for (let i = 0; i < 60; i++) {
+      const x = Math.round((Math.random() - 0.5) * 80);
+      const z = Math.round((Math.random() - 0.5) * 80);
+      // avoid zones
+      const skip = Object.values(ZONES).some((zo) => Math.hypot(x - zo.position[0], z - zo.position[2]) < 12);
+      if (!skip) arr.push({ x, z });
+    }
+    return arr;
+  }, []);
+  return (
+    <group>
+      {trees.map((t, i) => (
+        <group key={i} position={[t.x, 0, t.z]}>
+          <Block position={[0, 1, 0]} color="#5a3a1d" />
+          <Block position={[0, 2, 0]} color="#5a3a1d" />
+          <Block position={[0, 3, 0]} color="#3f7a3a" size={2.2} />
+          <Block position={[0, 4, 0]} color="#5fa85a" size={1.6} />
+        </group>
+      ))}
+    </group>
+  );
+}
