@@ -1,26 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense, useEffect, useState } from "react";
+import HUD from "@/components/hud/HUD";
+import { useGame } from "@/store/game";
+
+const World = lazy(() => import("@/components/world/World"));
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Blockfolio — A Voxel Portfolio Adventure" },
+      { name: "description", content: "Explore a handcrafted voxel world portfolio. WASD to move, mouse to look, E to interact. Built with Three.js, React Three Fiber and shaders." },
+      { property: "og:title", content: "Blockfolio — A Voxel Portfolio Adventure" },
+      { property: "og:description", content: "Spawn into a stylized Minecraft-inspired world. Skills become machines, projects become biomes, contact is a portal." },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  const [mounted, setMounted] = useState(false);
+  const started = useGame((s) => s.started);
+  useEffect(() => setMounted(true), []);
+
+  return (
+    <main className="relative h-screen w-screen overflow-hidden bg-[#1a0f1f]">
+      {mounted && started && (
+        <Suspense fallback={null}>
+          <World />
+        </Suspense>
+      )}
+      <HUD />
+    </main>
+  );
 }
