@@ -20,7 +20,12 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [mounted, setMounted] = useState(false);
   const started = useGame((s) => s.started);
-  useEffect(() => setMounted(true), []);
+  const setLoaded = useGame((s) => s.setLoaded);
+  useEffect(() => {
+    setMounted(true);
+    const t = setTimeout(() => setLoaded(true), 900);
+    return () => clearTimeout(t);
+  }, [setLoaded]);
 
   return (
     <main className="relative h-screen w-screen overflow-hidden bg-[#1a0f1f]">
