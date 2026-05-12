@@ -144,30 +144,134 @@ export default function HUD() {
 }
 
 function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boolean }) {
+  // Minecraft-style chunky stone title
+  const stoneTextStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-pixel)',
+    color: '#d8d8d8',
+    background: 'linear-gradient(180deg, #f4f4f4 0%, #c8c8c8 45%, #8a8a8a 50%, #6a6a6a 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    textShadow: '0 6px 0 rgba(0,0,0,0.55), 0 10px 22px rgba(0,0,0,0.6)',
+    filter: 'drop-shadow(0 4px 0 #2a2a2a)',
+    letterSpacing: '0.06em',
+    lineHeight: 1,
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a0f1f] text-white overflow-hidden">
-      {/* Falling block decoration */}
-      <div className="absolute inset-0 pointer-events-none opacity-60">
-        {Array.from({ length: 24 }).map((_, i) => (
+    <div className="fixed inset-0 z-50 overflow-hidden text-white">
+      {/* Sky gradient */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, #6cc7ff 0%, #9ddcff 38%, #cdeaff 60%, #7bbf5e 60%, #4f8f3f 100%)',
+          imageRendering: 'pixelated',
+        }}
+      />
+
+      {/* Pixel clouds */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[
+          { l: '8%', t: '14%', w: 140, d: 0 },
+          { l: '70%', t: '8%', w: 180, d: 6 },
+          { l: '40%', t: '22%', w: 110, d: 12 },
+          { l: '82%', t: '30%', w: 90, d: 4 },
+          { l: '18%', t: '34%', w: 120, d: 9 },
+        ].map((c, i) => (
           <div
             key={i}
-            className="absolute w-6 h-6"
+            className="absolute"
             style={{
-              left: `${(i * 37) % 100}%`,
-              top: `${(i * 53) % 100}%`,
-              background: ["#f6c453", "#5fa85a", "#42e2f5", "#c77dff", "#fb8500"][i % 5],
-              transform: `rotate(${i * 17}deg)`,
-              boxShadow: "inset -3px -3px 0 rgba(0,0,0,0.3), inset 3px 3px 0 rgba(255,255,255,0.2)",
-              animation: `blockfall ${1 + (i % 5) * 0.2}s ease-out ${i * 0.04}s both`,
+              left: c.l,
+              top: c.t,
+              width: c.w,
+              height: c.w * 0.32,
+              background: '#ffffff',
+              boxShadow:
+                '0 -10px 0 #ffffff, 14px -22px 0 #ffffff, -18px -14px 0 #ffffff, 30px -8px 0 #ffffff, -32px 0 0 #ffffff',
+              animation: `cloud-drift ${40 + i * 7}s linear ${-c.d}s infinite`,
+              opacity: 0.95,
+              imageRendering: 'pixelated',
             }}
           />
         ))}
       </div>
 
-      <div className="relative text-center max-w-xl px-6">
-        <div className="pixel-text text-sm opacity-70 mb-2">▸ A VOXEL PORTFOLIO EXPERIENCE</div>
-        <h1 className="pixel-text text-5xl md:text-7xl glow-gold mb-3">BLOCKFOLIO</h1>
-        <p className="pixel-text text-base md:text-lg opacity-80 mb-8 leading-relaxed">
+      {/* Distant pixel mountains */}
+      <div
+        className="absolute left-0 right-0 pointer-events-none"
+        style={{
+          bottom: '40%',
+          height: 120,
+          background:
+            'linear-gradient(180deg, transparent 0%, transparent 30%, #5a8b6b 30%, #3e6a4f 100%)',
+          clipPath:
+            'polygon(0 100%, 6% 70%, 12% 85%, 18% 55%, 26% 78%, 34% 50%, 42% 75%, 50% 60%, 58% 80%, 66% 55%, 74% 78%, 82% 65%, 90% 82%, 100% 70%, 100% 100%)',
+          opacity: 0.85,
+        }}
+      />
+
+      {/* Grass block ground band */}
+      <div className="absolute bottom-0 left-0 right-0 h-[40%] pointer-events-none">
+        {/* Grass top stripe */}
+        <div
+          className="absolute top-0 left-0 right-0 h-3"
+          style={{
+            background:
+              'repeating-linear-gradient(90deg, #4f8f3f 0 14px, #5ea34a 14px 28px)',
+            boxShadow: 'inset 0 -2px 0 #2e5a26',
+          }}
+        />
+        {/* Dirt voxels */}
+        <div
+          className="absolute top-3 left-0 right-0 bottom-0"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(0deg, #5a3a22 0 32px, #6b4528 32px 64px), repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 32px), repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 32px)',
+            backgroundBlendMode: 'multiply, normal, normal',
+          }}
+        />
+      </div>
+
+      {/* Floating decorative falling blocks */}
+      <div className="absolute inset-0 pointer-events-none">
+        {Array.from({ length: 14 }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute"
+            style={{
+              left: `${(i * 53 + 7) % 96}%`,
+              top: `-${20 + (i % 5) * 10}px`,
+              width: 22,
+              height: 22,
+              background: ['#7b4a25', '#5ea34a', '#9aa0a6', '#c8995a', '#7ec0ff'][i % 5],
+              boxShadow:
+                'inset -3px -3px 0 rgba(0,0,0,0.35), inset 3px 3px 0 rgba(255,255,255,0.25), 0 2px 0 rgba(0,0,0,0.3)',
+              animation: `mc-fall ${6 + (i % 6)}s linear ${i * 0.4}s infinite`,
+              transform: `rotate(${(i * 23) % 30 - 15}deg)`,
+              imageRendering: 'pixelated',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Center content */}
+      <div className="relative h-full w-full flex flex-col items-center justify-center px-6 text-center">
+        <div className="pixel-text text-sm md:text-base opacity-90 mb-3" style={{ color: '#fff7d6', textShadow: '2px 2px 0 rgba(0,0,0,0.7)' }}>
+          ▸ A VOXEL PORTFOLIO EXPERIENCE
+        </div>
+
+        <h1
+          className="text-6xl md:text-8xl lg:text-9xl mb-6 anim-blockfall"
+          style={stoneTextStyle}
+        >
+          BLOCKFOLIO
+        </h1>
+
+        <p
+          className="pixel-text text-base md:text-xl mb-8 leading-relaxed"
+          style={{ color: '#fffdf2', textShadow: '2px 2px 0 rgba(0,0,0,0.75)' }}
+        >
           Spawn into a handcrafted voxel world.<br />
           Explore biomes. Visit machines. Climb the peak.<br />
           Step through the portal to say hello.
@@ -176,15 +280,40 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
         <button
           disabled={!loaded}
           onClick={onStart}
-          className="hud-panel pixel-text text-2xl px-8 py-3 transition hover:bg-white/10 hover:scale-[1.03] disabled:opacity-50 disabled:cursor-wait glow-gold"
+          className="pixel-text text-2xl md:text-3xl px-10 py-4 transition active:translate-y-[3px] disabled:opacity-60 disabled:cursor-wait"
+          style={{
+            color: '#ffffff',
+            background:
+              'linear-gradient(180deg, #8bd16a 0%, #6db84a 50%, #4f9a35 100%)',
+            border: '3px solid #2e5a26',
+            boxShadow:
+              'inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.35), 0 6px 0 #234a1d, 0 8px 18px rgba(0,0,0,0.45)',
+            textShadow: '2px 2px 0 rgba(0,0,0,0.7)',
+            imageRendering: 'pixelated',
+          }}
         >
-          {loaded ? "▶ ENTER WORLD" : "GENERATING TERRAIN…"}
+          {loaded ? '▶ ENTER WORLD' : 'GENERATING TERRAIN…'}
         </button>
 
-        <div className="mt-8 pixel-text text-xs opacity-50">
+        <div
+          className="mt-8 pixel-text text-sm opacity-90"
+          style={{ color: '#fffdf2', textShadow: '2px 2px 0 rgba(0,0,0,0.7)' }}
+        >
           Best with sound on • Mouse + Keyboard recommended
         </div>
       </div>
+
+      <style>{`
+        @keyframes cloud-drift {
+          from { transform: translateX(-10vw); }
+          to { transform: translateX(110vw); }
+        }
+        @keyframes mc-fall {
+          0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+          10% { opacity: 1; }
+          100% { transform: translateY(110vh) rotate(180deg); opacity: 0.9; }
+        }
+      `}</style>
     </div>
   );
 }
