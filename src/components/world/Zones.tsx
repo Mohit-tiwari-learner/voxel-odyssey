@@ -282,31 +282,40 @@ export function ContactPortal() {
 }
 
 import { ZONES } from "@/store/game";
+import { heightAt } from "./Terrain";
+
+function grounded(id: keyof typeof ZONES): [number, number, number] {
+  const [x, , z] = ZONES[id].position;
+  return [x, heightAt(x, z) + 1, z];
+}
+
 const ZONES_LOCAL = {
-  village: ZONES.village.position,
-  factory: ZONES.factory.position,
-  projects: ZONES.projects.position,
-  mountain: ZONES.mountain.position,
-  portal: ZONES.portal.position,
+  village: grounded("village"),
+  factory: grounded("factory"),
+  projects: grounded("projects"),
+  mountain: grounded("mountain"),
+  portal: grounded("portal"),
 } as const;
 
-/* TREES — scattered voxel trees */
+/* TREES — scattered voxel trees, grounded to terrain */
 export function Trees() {
   const trees = useMemo(() => {
-    const arr: { x: number; z: number }[] = [];
-    for (let i = 0; i < 60; i++) {
-      const x = Math.round((Math.random() - 0.5) * 80);
-      const z = Math.round((Math.random() - 0.5) * 80);
-      // avoid zones
-      const skip = Object.values(ZONES).some((zo) => Math.hypot(x - zo.position[0], z - zo.position[2]) < 12);
-      if (!skip) arr.push({ x, z });
+    const arr: { x: number; z: number; y: number }[] = [];
+    for (let i = 0; i < 140; i++) {
+      const x = Math.round((Math.random() - 0.5) * 160);
+      const z = Math.round((Math.random() - 0.5) * 160);
+      const skip = Object.values(ZONES).some((zo) => Math.hypot(x - zo.position[0], z - zo.position[2]) < 14);
+      if (skip) continue;
+      const y = heightAt(x, z);
+      if (y < 0 || y > 6) continue;
+      arr.push({ x, z, y });
     }
     return arr;
   }, []);
   return (
     <group>
       {trees.map((t, i) => (
-        <group key={i} position={[t.x, 0, t.z]}>
+        <group key={i} position={[t.x, t.y + 1, t.z]}>
           <Block position={[0, 1, 0]} color="#5a3a1d" />
           <Block position={[0, 2, 0]} color="#5a3a1d" />
           <Block position={[0, 3, 0]} color="#3f7a3a" size={2.2} />

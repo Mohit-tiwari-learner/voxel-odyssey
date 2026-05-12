@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import * as THREE from "three";
+import { ZONES } from "@/store/game";
 
 // Deterministic pseudo-random
 function rand(x: number, z: number) {
@@ -7,13 +8,29 @@ function rand(x: number, z: number) {
   return s - Math.floor(s);
 }
 
+// Flatten plateaus around each zone so structures sit on solid, level ground
+function plateauAdjust(x: number, z: number, base: number) {
+  let h = base;
+  for (const zone of Object.values(ZONES)) {
+    const [zx, , zz] = zone.position;
+    const d = Math.hypot(x - zx, z - zz);
+    if (d < 16) {
+      // target plateau height per zone
+      const target = zone.id === "mountain" ? 6 : zone.id === "portal" ? -1 : 1;
+      const blend = Math.min(1, (16 - d) / 12);
+      h = h * (1 - blend) + target * blend;
+    }
+  }
+  return h;
+}
+
 function heightAt(x: number, z: number) {
-  const h =
+  const base =
     Math.sin(x * 0.08) * 1.2 +
     Math.cos(z * 0.07) * 1.2 +
     Math.sin((x + z) * 0.04) * 1.5 +
     rand(Math.floor(x), Math.floor(z)) * 0.6;
-  return Math.round(h);
+  return Math.round(plateauAdjust(x, z, base));
 }
 
 interface Props {
@@ -30,20 +47,14 @@ const SNOW = new THREE.Color("#eef4ff");
  * Instanced voxel terrain — one big InstancedMesh.
  * Generates a stylized valley with biome color tinting per zone.
  */
-export default function Terrain({ size = 90 }: Props) {
+export default function Terrain({ size = 180 }: Props) {
   const { positions, colors } = useMemo(() => {
     const pos: number[] = [];
     const col: number[] = [];
     const half = size / 2;
     for (let x = -half; x < half; x++) {
       for (let z = -half; z < half; z++) {
-        let h = heightAt(x, z);
-        // Carve valleys near zone centers, raise mountain
-        const dMountain = Math.hypot(x - 55, z - 65);
-        if (dMountain < 18) h += Math.max(0, 14 - dMountain * 0.7);
-        // Lower around portal area for drama
-        const dPortal = Math.hypot(x + 55, z - 65);
-        if (dPortal < 10) h = Math.min(h, 0);
+        const h = heightAt(x, z);
 
         // top block color
         const c = new THREE.Color();
