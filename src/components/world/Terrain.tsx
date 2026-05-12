@@ -47,20 +47,14 @@ const SNOW = new THREE.Color("#eef4ff");
  * Instanced voxel terrain — one big InstancedMesh.
  * Generates a stylized valley with biome color tinting per zone.
  */
-export default function Terrain({ size = 90 }: Props) {
+export default function Terrain({ size = 180 }: Props) {
   const { positions, colors } = useMemo(() => {
     const pos: number[] = [];
     const col: number[] = [];
     const half = size / 2;
     for (let x = -half; x < half; x++) {
       for (let z = -half; z < half; z++) {
-        let h = heightAt(x, z);
-        // Carve valleys near zone centers, raise mountain
-        const dMountain = Math.hypot(x - 55, z - 65);
-        if (dMountain < 18) h += Math.max(0, 14 - dMountain * 0.7);
-        // Lower around portal area for drama
-        const dPortal = Math.hypot(x + 55, z - 65);
-        if (dPortal < 10) h = Math.min(h, 0);
+        const h = heightAt(x, z);
 
         // top block color
         const c = new THREE.Color();
