@@ -22,22 +22,31 @@ export default function World() {
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 400, position: [0, 6, 14] }}
       onCreated={({ scene }) => {
-        scene.fog = new THREE.Fog("#f6c85f", 40, 160);
-        scene.background = new THREE.Color("#f6c85f");
+        scene.fog = new THREE.FogExp2("#ff7a3d", 0.012);
+        scene.background = new THREE.Color("#ff7a3d");
       }}
     >
       <Suspense fallback={null}>
-        {/* Sky & atmosphere */}
-        <Sky distance={450000} sunPosition={[60, 25, -100]} inclination={0.49} azimuth={0.25} turbidity={6} rayleigh={2} mieCoefficient={0.012} mieDirectionalG={0.86} />
+        {/* Sky & atmosphere — dramatic sunset */}
+        <Sky
+          distance={450000}
+          sunPosition={[-30, 1.5, -100]}
+          inclination={0.495}
+          azimuth={0.25}
+          turbidity={10}
+          rayleigh={4}
+          mieCoefficient={0.005}
+          mieDirectionalG={0.95}
+        />
         <Stars radius={300} depth={50} count={1500} factor={4} fade speed={0.4} />
 
-        {/* Lighting */}
-        <ambientLight intensity={0.55} color="#ffe7b3" />
+        {/* Lighting — warm sunset */}
+        <ambientLight intensity={0.35} color="#ffb178" />
         <directionalLight
           castShadow
-          position={[60, 60, -40]}
-          intensity={1.6}
-          color="#fff1c2"
+          position={[-40, 20, -60]}
+          intensity={1.4}
+          color="#ff9966"
           shadow-mapSize-width={1024}
           shadow-mapSize-height={1024}
           shadow-camera-far={200}
