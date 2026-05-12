@@ -55,13 +55,16 @@ export default function World() {
           shadow-camera-top={80}
           shadow-camera-bottom={-80}
         />
-        <hemisphereLight args={["#ffd9a3", "#3b2e1a", 0.4]} />
+        <hemisphereLight args={["#ff8c5a", "#2a1530", 0.55]} />
+        {/* Rim light from the sun direction */}
+        <pointLight position={[-60, 25, -80]} intensity={2.2} color="#ff5e3a" distance={220} decay={1.2} />
 
-        {/* Procedural clouds */}
+        {/* Procedural clouds — sunset tinted */}
         <Clouds material={THREE.MeshBasicMaterial}>
-          <Cloud seed={1} position={[20, 35, -40]} bounds={[20, 4, 20]} volume={8} color="#fff8e0" opacity={0.7} />
-          <Cloud seed={2} position={[-30, 38, -20]} bounds={[20, 4, 20]} volume={8} color="#ffe7b3" opacity={0.65} />
-          <Cloud seed={3} position={[10, 32, 30]} bounds={[20, 4, 20]} volume={8} color="#fff8e0" opacity={0.6} />
+          <Cloud seed={1} position={[20, 35, -40]} bounds={[22, 4, 22]} volume={8} color="#ff8a5c" opacity={0.75} />
+          <Cloud seed={2} position={[-30, 40, -30]} bounds={[24, 5, 24]} volume={9} color="#ffb27a" opacity={0.7} />
+          <Cloud seed={3} position={[10, 32, 30]} bounds={[20, 4, 20]} volume={8} color="#c44a6a" opacity={0.55} />
+          <Cloud seed={4} position={[-50, 45, -70]} bounds={[28, 6, 28]} volume={10} color="#ffd28a" opacity={0.8} />
         </Clouds>
 
         {/* World */}
