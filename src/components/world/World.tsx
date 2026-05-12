@@ -22,22 +22,31 @@ export default function World() {
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 400, position: [0, 6, 14] }}
       onCreated={({ scene }) => {
-        scene.fog = new THREE.Fog("#f6c85f", 40, 160);
-        scene.background = new THREE.Color("#f6c85f");
+        scene.fog = new THREE.FogExp2("#ff7a3d", 0.012);
+        scene.background = new THREE.Color("#ff7a3d");
       }}
     >
       <Suspense fallback={null}>
-        {/* Sky & atmosphere */}
-        <Sky distance={450000} sunPosition={[60, 25, -100]} inclination={0.49} azimuth={0.25} turbidity={6} rayleigh={2} mieCoefficient={0.012} mieDirectionalG={0.86} />
+        {/* Sky & atmosphere — dramatic sunset */}
+        <Sky
+          distance={450000}
+          sunPosition={[-30, 1.5, -100]}
+          inclination={0.495}
+          azimuth={0.25}
+          turbidity={10}
+          rayleigh={4}
+          mieCoefficient={0.005}
+          mieDirectionalG={0.95}
+        />
         <Stars radius={300} depth={50} count={1500} factor={4} fade speed={0.4} />
 
-        {/* Lighting */}
-        <ambientLight intensity={0.55} color="#ffe7b3" />
+        {/* Lighting — warm sunset */}
+        <ambientLight intensity={0.35} color="#ffb178" />
         <directionalLight
           castShadow
-          position={[60, 60, -40]}
-          intensity={1.6}
-          color="#fff1c2"
+          position={[-40, 20, -60]}
+          intensity={1.4}
+          color="#ff9966"
           shadow-mapSize-width={1024}
           shadow-mapSize-height={1024}
           shadow-camera-far={200}
@@ -46,13 +55,16 @@ export default function World() {
           shadow-camera-top={80}
           shadow-camera-bottom={-80}
         />
-        <hemisphereLight args={["#ffd9a3", "#3b2e1a", 0.4]} />
+        <hemisphereLight args={["#ff8c5a", "#2a1530", 0.55]} />
+        {/* Rim light from the sun direction */}
+        <pointLight position={[-60, 25, -80]} intensity={2.2} color="#ff5e3a" distance={220} decay={1.2} />
 
-        {/* Procedural clouds */}
+        {/* Procedural clouds — sunset tinted */}
         <Clouds material={THREE.MeshBasicMaterial}>
-          <Cloud seed={1} position={[20, 35, -40]} bounds={[20, 4, 20]} volume={8} color="#fff8e0" opacity={0.7} />
-          <Cloud seed={2} position={[-30, 38, -20]} bounds={[20, 4, 20]} volume={8} color="#ffe7b3" opacity={0.65} />
-          <Cloud seed={3} position={[10, 32, 30]} bounds={[20, 4, 20]} volume={8} color="#fff8e0" opacity={0.6} />
+          <Cloud seed={1} position={[20, 35, -40]} bounds={[22, 4, 22]} volume={8} color="#ff8a5c" opacity={0.75} />
+          <Cloud seed={2} position={[-30, 40, -30]} bounds={[24, 5, 24]} volume={9} color="#ffb27a" opacity={0.7} />
+          <Cloud seed={3} position={[10, 32, 30]} bounds={[20, 4, 20]} volume={8} color="#c44a6a" opacity={0.55} />
+          <Cloud seed={4} position={[-50, 45, -70]} bounds={[28, 6, 28]} volume={10} color="#ffd28a" opacity={0.8} />
         </Clouds>
 
         {/* World */}
@@ -68,9 +80,9 @@ export default function World() {
         <Player />
 
         <EffectComposer multisampling={0}>
-          <Bloom intensity={0.7} luminanceThreshold={0.55} luminanceSmoothing={0.2} mipmapBlur />
-          <ChromaticAberration offset={[0.0006, 0.0009] as any} radialModulation modulationOffset={0.4} />
-          <Vignette eskil={false} offset={0.2} darkness={0.7} />
+          <Bloom intensity={1.1} luminanceThreshold={0.4} luminanceSmoothing={0.3} mipmapBlur />
+          <ChromaticAberration offset={[0.0008, 0.0012] as any} radialModulation modulationOffset={0.5} />
+          <Vignette eskil={false} offset={0.15} darkness={0.85} />
         </EffectComposer>
       </Suspense>
     </Canvas>
