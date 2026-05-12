@@ -80,9 +80,9 @@ export default function World() {
         <Player />
 
         <EffectComposer multisampling={0}>
-          <Bloom intensity={0.7} luminanceThreshold={0.55} luminanceSmoothing={0.2} mipmapBlur />
-          <ChromaticAberration offset={[0.0006, 0.0009] as any} radialModulation modulationOffset={0.4} />
-          <Vignette eskil={false} offset={0.2} darkness={0.7} />
+          <Bloom intensity={1.1} luminanceThreshold={0.4} luminanceSmoothing={0.3} mipmapBlur />
+          <ChromaticAberration offset={[0.0008, 0.0012] as any} radialModulation modulationOffset={0.5} />
+          <Vignette eskil={false} offset={0.15} darkness={0.85} />
         </EffectComposer>
       </Suspense>
     </Canvas>
