@@ -116,14 +116,15 @@ export default function HUD() {
       {/* Cinematic letterbox during intro */}
       {introPlaying && (
         <>
-          <div className="absolute top-0 left-0 right-0 bg-black animate-[bar-in_0.6s_ease-out_forwards]" style={{ height: '12vh' }} />
-          <div className="absolute bottom-0 left-0 right-0 bg-black animate-[bar-in_0.6s_ease-out_forwards]" style={{ height: '12vh' }} />
-          <div className="absolute bottom-[14vh] left-1/2 -translate-x-1/2 pixel-text text-base md:text-xl glow-gold opacity-0 animate-[fade-in_1s_ease-out_0.6s_forwards]">
+          <div className="absolute top-0 left-0 right-0 bg-black" style={{ height: '12vh', animation: 'bar-in-top 0.7s ease-out both' }} />
+          <div className="absolute bottom-0 left-0 right-0 bg-black" style={{ height: '12vh', animation: 'bar-in-bottom 0.7s ease-out both' }} />
+          <div className="absolute bottom-[14vh] left-1/2 -translate-x-1/2 pixel-text text-base md:text-xl glow-gold" style={{ animation: 'fade-in 1s ease-out 0.7s both' }}>
             Welcome to Blockfolio…
           </div>
-          <style>{`@keyframes bar-in { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-          .absolute.bottom-0 { animation-name: bar-in-bottom !important; }
-          @keyframes bar-in-bottom { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
+          <style>{`
+            @keyframes bar-in-top { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+            @keyframes bar-in-bottom { from { transform: translateY(100%); } to { transform: translateY(0); } }
+          `}</style>
         </>
       )}
 
