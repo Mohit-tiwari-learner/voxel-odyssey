@@ -25,7 +25,7 @@ const ZONE_CONTENT: Record<Exclude<ZoneId, "spawn">, { title: string; body: stri
 };
 
 export default function HUD() {
-  const { started, start, loaded, pointerLocked, currentZone, interactionTarget, dialog, openDialog } = useGame();
+  const { started, start, loaded, pointerLocked, currentZone, interactionTarget, dialog, openDialog, introPlaying } = useGame();
 
   // Press E to interact
   useEffect(() => {
