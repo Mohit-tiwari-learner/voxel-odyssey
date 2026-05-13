@@ -187,6 +187,58 @@ function DayNightCycle({
   return null;
 }
 
+function CinematicIntro() {
+  const { camera } = useThree();
+  const introPlaying = useGame((s) => s.introPlaying);
+  const finishIntro = useGame((s) => s.finishIntro);
+  const startTime = useRef<number | null>(null);
+  const done = useRef(false);
+
+  // Waypoints: [position, lookAt]
+  const path = useMemo(() => ([
+    { p: new THREE.Vector3(0, 38, 70),  l: new THREE.Vector3(0, 4, 0) },   // high establishing shot
+    { p: new THREE.Vector3(-22, 18, 42), l: new THREE.Vector3(0, 4, 0) },  // sweep around
+    { p: new THREE.Vector3(14, 10, 26), l: new THREE.Vector3(0, 4, 0) },   // descend
+    { p: new THREE.Vector3(0, 6, 14),   l: new THREE.Vector3(0, 3, 0) },   // settle into player POV
+  ]), []);
+  const DURATION = 6.5;
+
+  useEffect(() => {
+    if (introPlaying) {
+      startTime.current = null;
+      done.current = false;
+    }
+  }, [introPlaying]);
+
+  useFrame(({ clock }) => {
+    if (!introPlaying || done.current) return;
+    if (startTime.current === null) startTime.current = clock.getElapsedTime();
+    const elapsed = clock.getElapsedTime() - startTime.current;
+    const t = Math.min(elapsed / DURATION, 1);
+
+    // ease in-out cubic
+    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    // sample along path
+    const seg = e * (path.length - 1);
+    const i = Math.min(Math.floor(seg), path.length - 2);
+    const k = seg - i;
+    const ks = k * k * (3 - 2 * k);
+    const pos = path[i].p.clone().lerp(path[i + 1].p, ks);
+    const look = path[i].l.clone().lerp(path[i + 1].l, ks);
+
+    camera.position.copy(pos);
+    camera.lookAt(look);
+
+    if (t >= 1) {
+      done.current = true;
+      finishIntro();
+    }
+  });
+
+  return null;
+}
+
 function SceneContents() {
   const sunRef = useRef<THREE.DirectionalLight | null>(null);
   const ambientRef = useRef<THREE.AmbientLight | null>(null);
