@@ -15,7 +15,6 @@ function plateauAdjust(x: number, z: number, base: number) {
     const [zx, , zz] = zone.position;
     const d = Math.hypot(x - zx, z - zz);
     if (d < 16) {
-      // target plateau height per zone
       const target = zone.id === "mountain" ? 6 : zone.id === "portal" ? -1 : 1;
       const blend = Math.min(1, (16 - d) / 12);
       h = h * (1 - blend) + target * blend;
@@ -39,13 +38,64 @@ interface Props {
 
 const GRASS = new THREE.Color("#5fa85a");
 const GRASS_DARK = new THREE.Color("#3f7a3a");
+const GRASS_DRY = new THREE.Color("#7fb96a");
 const SAND = new THREE.Color("#e8d39b");
 const STONE = new THREE.Color("#7c8087");
+const STONE_DARK = new THREE.Color("#5b6066");
 const SNOW = new THREE.Color("#eef4ff");
+const DIRT = new THREE.Color("#6b4a2b");
+const DIRT_DARK = new THREE.Color("#4d3520");
+
+/** Procedural pixel noise texture — adds surface detail to every voxel. */
+function makeNoiseTexture(seed = 1, contrast = 35) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 32;
+  const ctx = c.getContext("2d")!;
+  const img = ctx.createImageData(32, 32);
+  let s = seed;
+  const rng = () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+  for (let i = 0; i < 32 * 32; i++) {
+    const n = 220 + Math.floor((rng() - 0.5) * contrast);
+    img.data[i * 4] = n;
+    img.data[i * 4 + 1] = n;
+    img.data[i * 4 + 2] = n;
+    img.data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestMipmapLinearFilter;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 4;
+  return tex;
+}
+
+/** Build a 1x1x1 box with per-face shading baked into vertex colors.
+ *  Top is bright, bottom dark, +Z/-Z slightly different — that "Minecraft pop". */
+function makeShadedBox() {
+  const geo = new THREE.BoxGeometry(1, 1, 1);
+  // Face order in BoxGeometry: +X, -X, +Y(top), -Y(bottom), +Z, -Z
+  const faceShade = [0.88, 0.86, 1.18, 0.55, 0.96, 0.80];
+  const colors = new Float32Array(24 * 3);
+  for (let f = 0; f < 6; f++) {
+    for (let v = 0; v < 4; v++) {
+      const i = (f * 4 + v) * 3;
+      const s = faceShade[f];
+      colors[i] = s;
+      colors[i + 1] = s;
+      colors[i + 2] = s;
+    }
+  }
+  geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  return geo;
+}
 
 /**
  * Instanced voxel terrain — one big InstancedMesh.
- * Generates a stylized valley with biome color tinting per zone.
+ * Adds noise texture + per-face shading + richer biome color variation.
  */
 export default function Terrain({ size = 180 }: Props) {
   const { positions, colors } = useMemo(() => {
@@ -56,21 +106,32 @@ export default function Terrain({ size = 180 }: Props) {
       for (let z = -half; z < half; z++) {
         const h = heightAt(x, z);
 
-        // top block color
+        // top block color with subtle per-block variation
         const c = new THREE.Color();
-        if (h >= 10) c.copy(SNOW);
-        else if (h >= 5) c.copy(STONE);
-        else if (h <= -1) c.copy(SAND);
-        else c.copy(rand(x + 1, z + 3) > 0.5 ? GRASS : GRASS_DARK);
+        const r = rand(x + 1, z + 3);
+        if (h >= 10) {
+          c.copy(SNOW).offsetHSL(0, 0, (r - 0.5) * 0.04);
+        } else if (h >= 5) {
+          c.copy(r > 0.5 ? STONE : STONE_DARK).offsetHSL(0, 0, (rand(x, z) - 0.5) * 0.05);
+        } else if (h <= -1) {
+          c.copy(SAND).offsetHSL(0, (r - 0.5) * 0.1, (r - 0.5) * 0.06);
+        } else {
+          const pick = r;
+          if (pick > 0.66) c.copy(GRASS);
+          else if (pick > 0.33) c.copy(GRASS_DARK);
+          else c.copy(GRASS_DRY);
+          c.offsetHSL((rand(x + 7, z + 11) - 0.5) * 0.02, 0, (rand(x + 5, z) - 0.5) * 0.05);
+        }
 
-        // Top block
         pos.push(x, h, z);
         col.push(c.r, c.g, c.b);
 
-        // A couple stacked dirt/stone blocks beneath for depth visible at edges
+        // stacked dirt/stone beneath
         for (let d = 1; d <= 2; d++) {
           pos.push(x, h - d, z);
-          const dc = h - d > 4 ? STONE : new THREE.Color("#6b4a2b");
+          const dc = h - d > 4
+            ? (rand(x + d, z) > 0.5 ? STONE : STONE_DARK)
+            : (rand(x, z + d) > 0.5 ? DIRT : DIRT_DARK);
           col.push(dc.r, dc.g, dc.b);
         }
       }
@@ -84,8 +145,15 @@ export default function Terrain({ size = 180 }: Props) {
   const count = positions.length / 3;
 
   const mesh = useMemo(() => {
-    const geo = new THREE.BoxGeometry(1, 1, 1);
-    const mat = new THREE.MeshLambertMaterial({ vertexColors: false });
+    const geo = makeShadedBox();
+    const map = makeNoiseTexture(7, 40);
+    const mat = new THREE.MeshStandardMaterial({
+      map,
+      vertexColors: true,
+      roughness: 0.95,
+      metalness: 0,
+      flatShading: true,
+    });
     const m = new THREE.InstancedMesh(geo, mat, count);
     m.instanceMatrix.setUsage(THREE.StaticDrawUsage);
     const dummy = new THREE.Object3D();
@@ -97,12 +165,38 @@ export default function Terrain({ size = 180 }: Props) {
       colorAttr.setXYZ(i, colors[i * 3], colors[i * 3 + 1], colors[i * 3 + 2]);
     }
     m.instanceColor = colorAttr;
-    m.castShadow = false;
+    m.castShadow = true;
     m.receiveShadow = true;
     return m;
   }, [positions, colors, count]);
 
-  return <primitive object={mesh} />;
+  return (
+    <group>
+      <primitive object={mesh} />
+      {/* Water plane fills low areas (sand biome) */}
+      <Water />
+    </group>
+  );
+}
+
+function Water() {
+  const mat = useMemo(() => {
+    const m = new THREE.MeshStandardMaterial({
+      color: new THREE.Color("#3a8fb5"),
+      transparent: true,
+      opacity: 0.78,
+      roughness: 0.15,
+      metalness: 0.6,
+      envMapIntensity: 1,
+    });
+    return m;
+  }, []);
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.45, 0]} receiveShadow>
+      <planeGeometry args={[180, 180, 1, 1]} />
+      <primitive object={mat} attach="material" />
+    </mesh>
+  );
 }
 
 export { heightAt };
