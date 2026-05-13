@@ -28,6 +28,7 @@ export const ZONES: Record<ZoneId, Zone> = {
 interface GameState {
   loaded: boolean;
   started: boolean;
+  introPlaying: boolean;
   pointerLocked: boolean;
   currentZone: ZoneId;
   unlocked: Set<ZoneId>;
@@ -35,6 +36,7 @@ interface GameState {
   dialog: { title: string; body: string } | null;
   setLoaded: (v: boolean) => void;
   start: () => void;
+  finishIntro: () => void;
   setPointerLocked: (v: boolean) => void;
   setZone: (z: ZoneId) => void;
   unlock: (z: ZoneId) => void;
@@ -45,13 +47,15 @@ interface GameState {
 export const useGame = create<GameState>((set) => ({
   loaded: false,
   started: false,
+  introPlaying: false,
   pointerLocked: false,
   currentZone: "spawn",
   unlocked: new Set(["spawn"]),
   interactionTarget: null,
   dialog: null,
   setLoaded: (v) => set({ loaded: v }),
-  start: () => set({ started: true }),
+  start: () => set({ started: true, introPlaying: true }),
+  finishIntro: () => set({ introPlaying: false }),
   setPointerLocked: (v) => set({ pointerLocked: v }),
   setZone: (z) => set((s) => ({
     currentZone: z,
