@@ -104,13 +104,27 @@ export default function HUD() {
       </div>
 
       {/* Pointer-lock prompt */}
-      {!pointerLocked && (
+      {!pointerLocked && !introPlaying && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-none">
           <div className="hud-panel px-8 py-6 text-center anim-blockfall">
             <div className="pixel-text text-3xl glow-gold mb-2">CLICK TO PLAY</div>
             <div className="pixel-text text-sm opacity-80">Mouse will lock — press Esc to release</div>
           </div>
         </div>
+      )}
+
+      {/* Cinematic letterbox during intro */}
+      {introPlaying && (
+        <>
+          <div className="absolute top-0 left-0 right-0 bg-black animate-[bar-in_0.6s_ease-out_forwards]" style={{ height: '12vh' }} />
+          <div className="absolute bottom-0 left-0 right-0 bg-black animate-[bar-in_0.6s_ease-out_forwards]" style={{ height: '12vh' }} />
+          <div className="absolute bottom-[14vh] left-1/2 -translate-x-1/2 pixel-text text-base md:text-xl glow-gold opacity-0 animate-[fade-in_1s_ease-out_0.6s_forwards]">
+            Welcome to Blockfolio…
+          </div>
+          <style>{`@keyframes bar-in { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+          .absolute.bottom-0 { animation-name: bar-in-bottom !important; }
+          @keyframes bar-in-bottom { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
+        </>
       )}
 
       {/* Interaction prompt */}
