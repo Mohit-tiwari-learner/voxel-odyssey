@@ -25,7 +25,7 @@ const ZONE_CONTENT: Record<Exclude<ZoneId, "spawn">, { title: string; body: stri
 };
 
 export default function HUD() {
-  const { started, start, loaded, pointerLocked, currentZone, interactionTarget, dialog, openDialog } = useGame();
+  const { started, start, loaded, pointerLocked, currentZone, interactionTarget, dialog, openDialog, introPlaying } = useGame();
 
   // Press E to interact
   useEffect(() => {
@@ -104,13 +104,28 @@ export default function HUD() {
       </div>
 
       {/* Pointer-lock prompt */}
-      {!pointerLocked && (
+      {!pointerLocked && !introPlaying && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-none">
           <div className="hud-panel px-8 py-6 text-center anim-blockfall">
             <div className="pixel-text text-3xl glow-gold mb-2">CLICK TO PLAY</div>
             <div className="pixel-text text-sm opacity-80">Mouse will lock — press Esc to release</div>
           </div>
         </div>
+      )}
+
+      {/* Cinematic letterbox during intro */}
+      {introPlaying && (
+        <>
+          <div className="absolute top-0 left-0 right-0 bg-black" style={{ height: '12vh', animation: 'bar-in-top 0.7s ease-out both' }} />
+          <div className="absolute bottom-0 left-0 right-0 bg-black" style={{ height: '12vh', animation: 'bar-in-bottom 0.7s ease-out both' }} />
+          <div className="absolute bottom-[14vh] left-1/2 -translate-x-1/2 pixel-text text-base md:text-xl glow-gold" style={{ animation: 'fade-in 1s ease-out 0.7s both' }}>
+            Welcome to Blockfolio…
+          </div>
+          <style>{`
+            @keyframes bar-in-top { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+            @keyframes bar-in-bottom { from { transform: translateY(100%); } to { transform: translateY(0); } }
+          `}</style>
+        </>
       )}
 
       {/* Interaction prompt */}
