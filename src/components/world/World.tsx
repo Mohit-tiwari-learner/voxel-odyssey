@@ -298,6 +298,7 @@ function SceneContents() {
       <ContactPortal />
 
       <Player />
+      <CinematicIntro />
 
       <EffectComposer multisampling={0}>
         <Bloom ref={bloomRef} intensity={1.1} luminanceThreshold={0.4} luminanceSmoothing={0.3} mipmapBlur />
