@@ -5,12 +5,55 @@ import * as THREE from "three";
 import { Text, Float, Sparkles } from "@react-three/drei";
 import { useGame } from "@/store/game";
 
+/* Shared shaded box geometry + noise texture for "Minecraft pop" */
+const SHADED_BOX = (() => {
+  const geo = new THREE.BoxGeometry(1, 1, 1);
+  const faceShade = [0.88, 0.86, 1.18, 0.55, 0.96, 0.80];
+  const colors = new Float32Array(24 * 3);
+  for (let f = 0; f < 6; f++) {
+    for (let v = 0; v < 4; v++) {
+      const i = (f * 4 + v) * 3;
+      colors[i] = colors[i + 1] = colors[i + 2] = faceShade[f];
+    }
+  }
+  geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  return geo;
+})();
+
+const BLOCK_TEX = (() => {
+  if (typeof document === "undefined") return null;
+  const c = document.createElement("canvas");
+  c.width = c.height = 32;
+  const ctx = c.getContext("2d")!;
+  const img = ctx.createImageData(32, 32);
+  let s = 13;
+  const rng = () => { s = (s * 9301 + 49297) % 233280; return s / 233280; };
+  for (let i = 0; i < 32 * 32; i++) {
+    const n = 220 + Math.floor((rng() - 0.5) * 40);
+    img.data[i * 4] = n; img.data[i * 4 + 1] = n; img.data[i * 4 + 2] = n; img.data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestMipmapLinearFilter;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+})();
+
 /* Tiny helper: a stack of voxel blocks */
 function Block({ position, color, size = 1, emissive }: { position: [number, number, number]; color: string; size?: number; emissive?: string }) {
   return (
-    <mesh position={position} castShadow receiveShadow>
-      <boxGeometry args={[size, size, size]} />
-      <meshLambertMaterial color={color} emissive={emissive ?? "#000"} emissiveIntensity={emissive ? 0.6 : 0} />
+    <mesh position={position} scale={size} castShadow receiveShadow geometry={SHADED_BOX}>
+      <meshStandardMaterial
+        map={BLOCK_TEX ?? undefined}
+        color={color}
+        vertexColors
+        roughness={0.9}
+        metalness={0}
+        flatShading
+        emissive={emissive ?? "#000"}
+        emissiveIntensity={emissive ? 0.7 : 0}
+      />
     </mesh>
   );
 }
