@@ -270,8 +270,9 @@ function SceneContents() {
         position={[-40, 20, -60]}
         intensity={1.4}
         color="#ff9966"
-        shadow-mapSize-width={1024}
-        shadow-mapSize-height={1024}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-bias={-0.0005}
         shadow-camera-far={200}
         shadow-camera-left={-80}
         shadow-camera-right={80}
@@ -329,7 +330,8 @@ export default function World() {
   return (
     <Canvas
       shadows
-      gl={{ antialias: false, powerPreference: "high-performance" }}
+      gl={{ antialias: true, powerPreference: "high-performance" }}
+      shadows={{ type: THREE.PCFSoftShadowMap }}
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 400, position: [0, 6, 14] }}
       onCreated={({ scene }) => {
