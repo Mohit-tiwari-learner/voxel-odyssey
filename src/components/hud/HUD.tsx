@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useGame, ZONES, type ZoneId } from "@/store/game";
+import heroBg from "@/assets/hero-minecraft.jpg";
 
 const ZONE_CONTENT: Record<Exclude<ZoneId, "spawn">, { title: string; body: string }> = {
   village: {
@@ -159,176 +160,150 @@ export default function HUD() {
 }
 
 function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boolean }) {
-  // Minecraft-style chunky stone title
-  const stoneTextStyle: React.CSSProperties = {
+  // Big chunky Minecraft-style logo letters
+  const logoStyle: React.CSSProperties = {
     fontFamily: 'var(--font-pixel)',
-    color: '#d8d8d8',
-    background: 'linear-gradient(180deg, #f4f4f4 0%, #c8c8c8 45%, #8a8a8a 50%, #6a6a6a 100%)',
+    color: '#e8e8e8',
+    background:
+      'linear-gradient(180deg, #f6f6f6 0%, #c7c7c7 38%, #8a8a8a 55%, #5e5e5e 100%)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
-    textShadow: '0 6px 0 rgba(0,0,0,0.55), 0 10px 22px rgba(0,0,0,0.6)',
-    filter: 'drop-shadow(0 4px 0 #2a2a2a)',
-    letterSpacing: '0.06em',
+    textShadow:
+      '0 4px 0 rgba(0,0,0,0.55), 0 8px 0 rgba(0,0,0,0.45), 0 14px 28px rgba(0,0,0,0.6)',
+    filter:
+      'drop-shadow(0 3px 0 #2a2a2a) drop-shadow(0 6px 0 #1a1a1a)',
+    letterSpacing: '0.08em',
     lineHeight: 1,
+    transform: 'rotate(-2deg)',
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden text-white">
-      {/* Sky gradient */}
+      {/* Hero Minecraft-style background image */}
+      <img
+        src={heroBg}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ imageRendering: 'pixelated' }}
+      />
+      {/* Subtle vignette + readability overlay */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'linear-gradient(180deg, #6cc7ff 0%, #9ddcff 38%, #cdeaff 60%, #7bbf5e 60%, #4f8f3f 100%)',
-          imageRendering: 'pixelated',
+            'radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.45) 100%), linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.35) 100%)',
         }}
       />
 
-      {/* Pixel clouds */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[
-          { l: '8%', t: '14%', w: 140, d: 0 },
-          { l: '70%', t: '8%', w: 180, d: 6 },
-          { l: '40%', t: '22%', w: 110, d: 12 },
-          { l: '82%', t: '30%', w: 90, d: 4 },
-          { l: '18%', t: '34%', w: 120, d: 9 },
-        ].map((c, i) => (
+      {/* Foreground UI */}
+      <div className="relative h-full w-full flex flex-col items-center px-6 text-center">
+        {/* Top: huge tilted logo */}
+        <div className="mt-[5vh] md:mt-[6vh] anim-blockfall">
+          <h1
+            className="text-7xl md:text-9xl lg:text-[11rem]"
+            style={logoStyle}
+          >
+            BLOCKFOLIO
+          </h1>
           <div
-            key={i}
-            className="absolute"
+            className="mt-2 pixel-text text-xs md:text-sm tracking-[0.3em]"
             style={{
-              left: c.l,
-              top: c.t,
-              width: c.w,
-              height: c.w * 0.32,
-              background: '#ffffff',
+              color: '#fff7d6',
+              textShadow: '2px 2px 0 rgba(0,0,0,0.8)',
+              transform: 'rotate(-1deg)',
+            }}
+          >
+            A VOXEL PORTFOLIO EXPERIENCE
+          </div>
+        </div>
+
+        {/* Spacer pushes button area to lower half */}
+        <div className="flex-1" />
+
+        {/* Bottom: button stack like Minecraft menu */}
+        <div className="mb-[8vh] w-full max-w-md flex flex-col items-stretch gap-3">
+          <button
+            disabled={!loaded}
+            onClick={onStart}
+            className="pixel-text text-xl md:text-2xl py-3 transition active:translate-y-[3px] disabled:opacity-60 disabled:cursor-wait"
+            style={{
+              color: '#ffffff',
+              background:
+                'linear-gradient(180deg, #b9b9b9 0%, #8f8f8f 50%, #6a6a6a 100%)',
+              border: '3px solid #2a2a2a',
               boxShadow:
-                '0 -10px 0 #ffffff, 14px -22px 0 #ffffff, -18px -14px 0 #ffffff, 30px -8px 0 #ffffff, -32px 0 0 #ffffff',
-              animation: `cloud-drift ${40 + i * 7}s linear ${-c.d}s infinite`,
-              opacity: 0.95,
+                'inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.4), 0 6px 0 #1a1a1a, 0 10px 24px rgba(0,0,0,0.5)',
+              textShadow: '2px 2px 0 rgba(0,0,0,0.7)',
               imageRendering: 'pixelated',
             }}
-          />
-        ))}
+          >
+            {loaded ? '▶ ENTER WORLD' : 'GENERATING TERRAIN…'}
+          </button>
+
+          <div className="grid grid-cols-2 gap-3">
+            <FakeMenuButton label="Options..." />
+            <FakeMenuButton label="Quit" />
+          </div>
+        </div>
+
+        {/* Footer corners */}
+        <div
+          className="absolute bottom-2 left-3 pixel-text text-xs"
+          style={{ color: '#fff', textShadow: '2px 2px 0 rgba(0,0,0,0.8)' }}
+        >
+          Blockfolio 1.0 (Voxel Edition)
+        </div>
+        <div
+          className="absolute bottom-2 right-3 pixel-text text-xs"
+          style={{ color: '#fff', textShadow: '2px 2px 0 rgba(0,0,0,0.8)' }}
+        >
+          Copyright Mojang-style ✦ Made for the web
+        </div>
       </div>
 
-      {/* Distant pixel mountains */}
+      {/* Splash text — yellow tilted, like Minecraft */}
       <div
-        className="absolute left-0 right-0 pointer-events-none"
+        className="absolute pointer-events-none pixel-text"
         style={{
-          bottom: '40%',
-          height: 120,
-          background:
-            'linear-gradient(180deg, transparent 0%, transparent 30%, #5a8b6b 30%, #3e6a4f 100%)',
-          clipPath:
-            'polygon(0 100%, 6% 70%, 12% 85%, 18% 55%, 26% 78%, 34% 50%, 42% 75%, 50% 60%, 58% 80%, 66% 55%, 74% 78%, 82% 65%, 90% 82%, 100% 70%, 100% 100%)',
-          opacity: 0.85,
+          top: '14vh',
+          right: '12vw',
+          color: '#ffdc00',
+          textShadow: '2px 2px 0 rgba(80,60,0,0.9)',
+          transform: 'rotate(-18deg)',
+          fontSize: 'clamp(14px, 1.8vw, 26px)',
+          animation: 'splash-pulse 0.6s ease-in-out infinite alternate',
         }}
-      />
-
-      {/* Grass block ground band */}
-      <div className="absolute bottom-0 left-0 right-0 h-[40%] pointer-events-none">
-        {/* Grass top stripe */}
-        <div
-          className="absolute top-0 left-0 right-0 h-3"
-          style={{
-            background:
-              'repeating-linear-gradient(90deg, #4f8f3f 0 14px, #5ea34a 14px 28px)',
-            boxShadow: 'inset 0 -2px 0 #2e5a26',
-          }}
-        />
-        {/* Dirt voxels */}
-        <div
-          className="absolute top-3 left-0 right-0 bottom-0"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(0deg, #5a3a22 0 32px, #6b4528 32px 64px), repeating-linear-gradient(90deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 32px), repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 32px)',
-            backgroundBlendMode: 'multiply, normal, normal',
-          }}
-        />
-      </div>
-
-      {/* Floating decorative falling blocks */}
-      <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: 14 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute"
-            style={{
-              left: `${(i * 53 + 7) % 96}%`,
-              top: `-${20 + (i % 5) * 10}px`,
-              width: 22,
-              height: 22,
-              background: ['#7b4a25', '#5ea34a', '#9aa0a6', '#c8995a', '#7ec0ff'][i % 5],
-              boxShadow:
-                'inset -3px -3px 0 rgba(0,0,0,0.35), inset 3px 3px 0 rgba(255,255,255,0.25), 0 2px 0 rgba(0,0,0,0.3)',
-              animation: `mc-fall ${6 + (i % 6)}s linear ${i * 0.4}s infinite`,
-              transform: `rotate(${(i * 23) % 30 - 15}deg)`,
-              imageRendering: 'pixelated',
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Center content */}
-      <div className="relative h-full w-full flex flex-col items-center justify-center px-6 text-center">
-        <div className="pixel-text text-sm md:text-base opacity-90 mb-3" style={{ color: '#fff7d6', textShadow: '2px 2px 0 rgba(0,0,0,0.7)' }}>
-          ▸ A VOXEL PORTFOLIO EXPERIENCE
-        </div>
-
-        <h1
-          className="text-6xl md:text-8xl lg:text-9xl mb-6 anim-blockfall"
-          style={stoneTextStyle}
-        >
-          BLOCKFOLIO
-        </h1>
-
-        <p
-          className="pixel-text text-base md:text-xl mb-8 leading-relaxed"
-          style={{ color: '#fffdf2', textShadow: '2px 2px 0 rgba(0,0,0,0.75)' }}
-        >
-          Spawn into a handcrafted voxel world.<br />
-          Explore biomes. Visit machines. Climb the peak.<br />
-          Step through the portal to say hello.
-        </p>
-
-        <button
-          disabled={!loaded}
-          onClick={onStart}
-          className="pixel-text text-2xl md:text-3xl px-10 py-4 transition active:translate-y-[3px] disabled:opacity-60 disabled:cursor-wait"
-          style={{
-            color: '#ffffff',
-            background:
-              'linear-gradient(180deg, #8bd16a 0%, #6db84a 50%, #4f9a35 100%)',
-            border: '3px solid #2e5a26',
-            boxShadow:
-              'inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.35), 0 6px 0 #234a1d, 0 8px 18px rgba(0,0,0,0.45)',
-            textShadow: '2px 2px 0 rgba(0,0,0,0.7)',
-            imageRendering: 'pixelated',
-          }}
-        >
-          {loaded ? '▶ ENTER WORLD' : 'GENERATING TERRAIN…'}
-        </button>
-
-        <div
-          className="mt-8 pixel-text text-sm opacity-90"
-          style={{ color: '#fffdf2', textShadow: '2px 2px 0 rgba(0,0,0,0.7)' }}
-        >
-          Best with sound on • Mouse + Keyboard recommended
-        </div>
+      >
+        Now with shaders!
       </div>
 
       <style>{`
-        @keyframes cloud-drift {
-          from { transform: translateX(-10vw); }
-          to { transform: translateX(110vw); }
-        }
-        @keyframes mc-fall {
-          0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
-          10% { opacity: 1; }
-          100% { transform: translateY(110vh) rotate(180deg); opacity: 0.9; }
+        @keyframes splash-pulse {
+          from { transform: rotate(-18deg) scale(1); }
+          to   { transform: rotate(-18deg) scale(1.08); }
         }
       `}</style>
     </div>
+  );
+}
+
+function FakeMenuButton({ label }: { label: string }) {
+  return (
+    <button
+      disabled
+      className="pixel-text text-base md:text-lg py-2 cursor-not-allowed opacity-80"
+      style={{
+        color: '#ffffff',
+        background:
+          'linear-gradient(180deg, #9a9a9a 0%, #7a7a7a 50%, #5a5a5a 100%)',
+        border: '3px solid #2a2a2a',
+        boxShadow:
+          'inset 0 2px 0 rgba(255,255,255,0.25), inset 0 -3px 0 rgba(0,0,0,0.4), 0 4px 0 #1a1a1a',
+        textShadow: '2px 2px 0 rgba(0,0,0,0.7)',
+      }}
+    >
+      {label}
+    </button>
   );
 }
