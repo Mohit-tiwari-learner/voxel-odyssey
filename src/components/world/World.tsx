@@ -329,9 +329,8 @@ export default function World() {
 
   return (
     <Canvas
-      shadows
-      gl={{ antialias: true, powerPreference: "high-performance" }}
       shadows={{ type: THREE.PCFSoftShadowMap }}
+      gl={{ antialias: true, powerPreference: "high-performance" }}
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 400, position: [0, 6, 14] }}
       onCreated={({ scene }) => {
