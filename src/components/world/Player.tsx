@@ -20,6 +20,7 @@ export default function Player() {
   const setZone = useGame((s) => s.setZone);
   const setInteraction = useGame((s) => s.setInteraction);
   const currentZone = useGame((s) => s.currentZone);
+  const introPlaying = useGame((s) => s.introPlaying);
 
   useEffect(() => {
     camera.position.set(0, 6, 14);
@@ -35,6 +36,7 @@ export default function Player() {
   }, [camera]);
 
   useFrame((_, dt) => {
+    if (introPlaying) return;
     const d = Math.min(dt, 0.05);
     const k = keys.current;
     const sprint = k["ShiftLeft"] || k["ShiftRight"];
@@ -98,7 +100,7 @@ export default function Player() {
     }
   });
 
-  return (
+  return introPlaying ? null : (
     <PointerLockControls
       ref={controlsRef}
       onLock={() => setPointerLocked(true)}
