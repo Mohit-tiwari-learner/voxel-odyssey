@@ -1,7 +1,8 @@
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Sky, Cloud, Clouds, Stars } from "@react-three/drei";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { Sky, Cloud, Clouds, Stars, Environment, SoftShadows } from "@react-three/drei";
+import { EffectComposer, Bloom, SSAO, SMAA, ToneMapping, BrightnessContrast, HueSaturation } from "@react-three/postprocessing";
+import { BlendFunction, ToneMappingMode } from "postprocessing";
 import * as THREE from "three";
 import Terrain from "./Terrain";
 import Player from "./Player";
@@ -63,14 +64,14 @@ const KEYS: Keyframe[] = [
     starsOpacity: 0.25, bloom: 1.0,
     turbidity: 8, rayleigh: 3,
   },
-  { // noon - bright Minecraft daylight
+  { // noon - bright Minecraft daylight, ACES-ready
     t: 0.72,
-    sun: [40, 90, -20], sunColor: "#ffffff", sunIntensity: 1.35,
-    ambient: "#ffffff", ambientIntensity: 0.85,
-    hemiSky: "#69b7ff", hemiGround: "#7a5a3a", hemiIntensity: 0.9,
-    fog: "#7ec0ff", fogDensity: 0.0015,
+    sun: [40, 90, -20], sunColor: "#fff5e1", sunIntensity: 1.6,
+    ambient: "#ffffff", ambientIntensity: 0.55,
+    hemiSky: "#a8d4ff", hemiGround: "#6b4f33", hemiIntensity: 0.65,
+    fog: "#bcd9f5", fogDensity: 0.0035,
     rim: "#ffffff", rimIntensity: 0.2,
-    starsOpacity: 0, bloom: 0.18,
+    starsOpacity: 0, bloom: 0.22,
     turbidity: 2, rayleigh: 0.6,
   },
   { // back to sunset
@@ -250,6 +251,9 @@ function SceneContents() {
 
   return (
     <>
+      {/* Soft contact shadows for crisp tree/house edges */}
+      <SoftShadows size={28} samples={16} focus={0.6} />
+
       <Sky
         ref={skyRef}
         distance={450000}
@@ -261,25 +265,27 @@ function SceneContents() {
         mieCoefficient={0.003}
         mieDirectionalG={0.85}
       />
+      {/* HDRI environment for realistic reflections on water/metal */}
+      <Environment preset="park" background={false} environmentIntensity={0.55} />
       <Stars ref={starsRef} radius={300} depth={50} count={1500} factor={4} fade speed={0.4} />
 
-      <ambientLight ref={ambientRef} intensity={0.85} color="#ffffff" />
+      <ambientLight ref={ambientRef} intensity={0.55} color="#ffffff" />
       <directionalLight
         ref={sunRef}
         castShadow
         position={[40, 90, -20]}
-        intensity={1.35}
-        color="#ffffff"
+        intensity={1.6}
+        color="#fff5e1"
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-bias={-0.0005}
-        shadow-camera-far={200}
-        shadow-camera-left={-80}
-        shadow-camera-right={80}
-        shadow-camera-top={80}
-        shadow-camera-bottom={-80}
+        shadow-camera-far={220}
+        shadow-camera-left={-90}
+        shadow-camera-right={90}
+        shadow-camera-top={90}
+        shadow-camera-bottom={-90}
       />
-      <hemisphereLight ref={hemiRef} args={["#69b7ff", "#7a5a3a", 0.9]} />
+      <hemisphereLight ref={hemiRef} args={["#a8d4ff", "#6b4f33", 0.65]} />
       <pointLight ref={rimRef} position={[40, 115, -20]} intensity={0.2} color="#ffffff" distance={220} decay={1.2} />
 
       <Clouds material={THREE.MeshBasicMaterial}>
@@ -301,8 +307,26 @@ function SceneContents() {
       <Player />
       <CinematicIntro />
 
-      <EffectComposer multisampling={4}>
-        <Bloom ref={bloomRef} intensity={0.18} luminanceThreshold={0.85} luminanceSmoothing={0.2} mipmapBlur />
+      <EffectComposer multisampling={4} enableNormalPass>
+        {/* Crevice darkening between blocks */}
+        <SSAO
+          blendFunction={BlendFunction.MULTIPLY}
+          samples={16}
+          radius={0.18}
+          intensity={22}
+          luminanceInfluence={0.6}
+          worldDistanceThreshold={40}
+          worldDistanceFalloff={10}
+          worldProximityThreshold={6}
+          worldProximityFalloff={2}
+        />
+        <Bloom ref={bloomRef} intensity={0.22} luminanceThreshold={0.78} luminanceSmoothing={0.22} mipmapBlur />
+        {/* Subtle cover-art punch */}
+        <HueSaturation hue={0} saturation={0.08} />
+        <BrightnessContrast brightness={0.0} contrast={0.06} />
+        {/* ACES filmic tone mapping for HDR -> screen */}
+        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+        <SMAA />
       </EffectComposer>
 
       <DayNightCycle
@@ -332,9 +356,10 @@ export default function World() {
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 400, position: [0, 6, 14] }}
       onCreated={({ scene, gl }) => {
-        scene.fog = new THREE.FogExp2("#7ec0ff", 0.0015);
-        scene.background = new THREE.Color("#5fb0ff");
-        gl.toneMapping = THREE.NoToneMapping;
+        scene.fog = new THREE.FogExp2("#bcd9f5", 0.0035);
+        scene.background = new THREE.Color("#7fbfff");
+        gl.toneMapping = THREE.NoToneMapping; // ToneMapping pass handles ACES
+        gl.outputColorSpace = THREE.SRGBColorSpace;
       }}
     >
       <Suspense fallback={null}>
