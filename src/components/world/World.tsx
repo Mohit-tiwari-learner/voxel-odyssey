@@ -251,6 +251,9 @@ function SceneContents() {
 
   return (
     <>
+      {/* Soft contact shadows for crisp tree/house edges */}
+      <SoftShadows size={28} samples={16} focus={0.6} />
+
       <Sky
         ref={skyRef}
         distance={450000}
@@ -262,25 +265,27 @@ function SceneContents() {
         mieCoefficient={0.003}
         mieDirectionalG={0.85}
       />
+      {/* HDRI environment for realistic reflections on water/metal */}
+      <Environment preset="park" background={false} environmentIntensity={0.55} />
       <Stars ref={starsRef} radius={300} depth={50} count={1500} factor={4} fade speed={0.4} />
 
-      <ambientLight ref={ambientRef} intensity={0.85} color="#ffffff" />
+      <ambientLight ref={ambientRef} intensity={0.55} color="#ffffff" />
       <directionalLight
         ref={sunRef}
         castShadow
         position={[40, 90, -20]}
-        intensity={1.35}
-        color="#ffffff"
+        intensity={1.6}
+        color="#fff5e1"
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-bias={-0.0005}
-        shadow-camera-far={200}
-        shadow-camera-left={-80}
-        shadow-camera-right={80}
-        shadow-camera-top={80}
-        shadow-camera-bottom={-80}
+        shadow-camera-far={220}
+        shadow-camera-left={-90}
+        shadow-camera-right={90}
+        shadow-camera-top={90}
+        shadow-camera-bottom={-90}
       />
-      <hemisphereLight ref={hemiRef} args={["#69b7ff", "#7a5a3a", 0.9]} />
+      <hemisphereLight ref={hemiRef} args={["#a8d4ff", "#6b4f33", 0.65]} />
       <pointLight ref={rimRef} position={[40, 115, -20]} intensity={0.2} color="#ffffff" distance={220} decay={1.2} />
 
       <Clouds material={THREE.MeshBasicMaterial}>
@@ -302,8 +307,26 @@ function SceneContents() {
       <Player />
       <CinematicIntro />
 
-      <EffectComposer multisampling={4}>
-        <Bloom ref={bloomRef} intensity={0.18} luminanceThreshold={0.85} luminanceSmoothing={0.2} mipmapBlur />
+      <EffectComposer multisampling={4} enableNormalPass>
+        {/* Crevice darkening between blocks */}
+        <SSAO
+          blendFunction={BlendFunction.MULTIPLY}
+          samples={16}
+          radius={0.18}
+          intensity={22}
+          luminanceInfluence={0.6}
+          worldDistanceThreshold={40}
+          worldDistanceFalloff={10}
+          worldProximityThreshold={6}
+          worldProximityFalloff={2}
+        />
+        <Bloom ref={bloomRef} intensity={0.22} luminanceThreshold={0.78} luminanceSmoothing={0.22} mipmapBlur />
+        {/* Subtle cover-art punch */}
+        <HueSaturation hue={0} saturation={0.08} />
+        <BrightnessContrast brightness={0.0} contrast={0.06} />
+        {/* ACES filmic tone mapping for HDR -> screen */}
+        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+        <SMAA />
       </EffectComposer>
 
       <DayNightCycle
