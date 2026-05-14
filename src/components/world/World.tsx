@@ -1,7 +1,8 @@
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Sky, Cloud, Clouds, Stars } from "@react-three/drei";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { Sky, Cloud, Clouds, Stars, Environment, SoftShadows } from "@react-three/drei";
+import { EffectComposer, Bloom, SSAO, SMAA, ToneMapping, BrightnessContrast, HueSaturation } from "@react-three/postprocessing";
+import { BlendFunction, ToneMappingMode } from "postprocessing";
 import * as THREE from "three";
 import Terrain from "./Terrain";
 import Player from "./Player";
