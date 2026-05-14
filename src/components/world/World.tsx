@@ -63,15 +63,15 @@ const KEYS: Keyframe[] = [
     starsOpacity: 0.25, bloom: 1.0,
     turbidity: 8, rayleigh: 3,
   },
-  { // noon
+  { // noon - bright Minecraft daylight
     t: 0.72,
-    sun: [40, 90, -20], sunColor: "#fff5d6", sunIntensity: 1.7,
-    ambient: "#ffeec8", ambientIntensity: 0.55,
-    hemiSky: "#bfe2ff", hemiGround: "#3b2e1a", hemiIntensity: 0.65,
-    fog: "#cfe6ff", fogDensity: 0.006,
-    rim: "#fff1c2", rimIntensity: 0.4,
-    starsOpacity: 0, bloom: 0.7,
-    turbidity: 4, rayleigh: 1.2,
+    sun: [40, 90, -20], sunColor: "#ffffff", sunIntensity: 1.35,
+    ambient: "#ffffff", ambientIntensity: 0.85,
+    hemiSky: "#69b7ff", hemiGround: "#7a5a3a", hemiIntensity: 0.9,
+    fog: "#7ec0ff", fogDensity: 0.0015,
+    rim: "#ffffff", rimIntensity: 0.2,
+    starsOpacity: 0, bloom: 0.18,
+    turbidity: 2, rayleigh: 0.6,
   },
   { // back to sunset
     t: 1,
