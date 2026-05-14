@@ -334,8 +334,8 @@ export default function World() {
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 400, position: [0, 6, 14] }}
       onCreated={({ scene }) => {
-        scene.fog = new THREE.FogExp2("#ff7a3d", 0.012);
-        scene.background = new THREE.Color("#ff7a3d");
+        scene.fog = new THREE.FogExp2("#cfe6ff", 0.006);
+        scene.background = new THREE.Color("#cfe6ff");
       }}
     >
       <Suspense fallback={null}>
