@@ -141,9 +141,9 @@ function DayNightCycle({
   const bg = useMemo(() => scene.background as THREE.Color, [scene]);
   const sunDir = useRef(new THREE.Vector3());
 
-  useFrame(({ clock }) => {
-    const t = (clock.getElapsedTime() / CYCLE_SECONDS) % 1;
-    const k = sampleCycle(t);
+  useFrame(() => {
+    // Locked to bright daytime (noon) for a Minecraft-style light theme
+    const k = sampleCycle(0.72);
 
     sunDir.current.set(k.sun[0], k.sun[1], k.sun[2]).normalize();
 
