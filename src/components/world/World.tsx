@@ -253,23 +253,23 @@ function SceneContents() {
       <Sky
         ref={skyRef}
         distance={450000}
-        sunPosition={[-30, 1.5, -100]}
-        inclination={0.495}
+        sunPosition={[40, 90, -20]}
+        inclination={0.6}
         azimuth={0.25}
-        turbidity={10}
-        rayleigh={4}
+        turbidity={4}
+        rayleigh={1.2}
         mieCoefficient={0.005}
-        mieDirectionalG={0.95}
+        mieDirectionalG={0.8}
       />
       <Stars ref={starsRef} radius={300} depth={50} count={1500} factor={4} fade speed={0.4} />
 
-      <ambientLight ref={ambientRef} intensity={0.35} color="#ffb178" />
+      <ambientLight ref={ambientRef} intensity={0.55} color="#ffeec8" />
       <directionalLight
         ref={sunRef}
         castShadow
-        position={[-40, 20, -60]}
-        intensity={1.4}
-        color="#ff9966"
+        position={[40, 90, -20]}
+        intensity={1.7}
+        color="#fff5d6"
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-bias={-0.0005}
@@ -279,14 +279,14 @@ function SceneContents() {
         shadow-camera-top={80}
         shadow-camera-bottom={-80}
       />
-      <hemisphereLight ref={hemiRef} args={["#ff8c5a", "#2a1530", 0.55]} />
-      <pointLight ref={rimRef} position={[-60, 25, -80]} intensity={2.2} color="#ff5e3a" distance={220} decay={1.2} />
+      <hemisphereLight ref={hemiRef} args={["#bfe2ff", "#3b2e1a", 0.65]} />
+      <pointLight ref={rimRef} position={[40, 115, -20]} intensity={0.4} color="#fff1c2" distance={220} decay={1.2} />
 
       <Clouds material={THREE.MeshBasicMaterial}>
-        <Cloud seed={1} position={[20, 35, -40]} bounds={[22, 4, 22]} volume={8} color="#ff8a5c" opacity={0.75} />
-        <Cloud seed={2} position={[-30, 40, -30]} bounds={[24, 5, 24]} volume={9} color="#ffb27a" opacity={0.7} />
-        <Cloud seed={3} position={[10, 32, 30]} bounds={[20, 4, 20]} volume={8} color="#c44a6a" opacity={0.55} />
-        <Cloud seed={4} position={[-50, 45, -70]} bounds={[28, 6, 28]} volume={10} color="#ffd28a" opacity={0.8} />
+        <Cloud seed={1} position={[20, 35, -40]} bounds={[22, 4, 22]} volume={8} color="#ffffff" opacity={0.85} />
+        <Cloud seed={2} position={[-30, 40, -30]} bounds={[24, 5, 24]} volume={9} color="#ffffff" opacity={0.8} />
+        <Cloud seed={3} position={[10, 32, 30]} bounds={[20, 4, 20]} volume={8} color="#f5faff" opacity={0.75} />
+        <Cloud seed={4} position={[-50, 45, -70]} bounds={[28, 6, 28]} volume={10} color="#ffffff" opacity={0.9} />
       </Clouds>
 
       <Terrain size={90} />
