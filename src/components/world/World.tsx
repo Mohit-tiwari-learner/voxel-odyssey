@@ -356,9 +356,10 @@ export default function World() {
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 400, position: [0, 6, 14] }}
       onCreated={({ scene, gl }) => {
-        scene.fog = new THREE.FogExp2("#7ec0ff", 0.0015);
-        scene.background = new THREE.Color("#5fb0ff");
-        gl.toneMapping = THREE.NoToneMapping;
+        scene.fog = new THREE.FogExp2("#bcd9f5", 0.0035);
+        scene.background = new THREE.Color("#7fbfff");
+        gl.toneMapping = THREE.NoToneMapping; // ToneMapping pass handles ACES
+        gl.outputColorSpace = THREE.SRGBColorSpace;
       }}
     >
       <Suspense fallback={null}>
