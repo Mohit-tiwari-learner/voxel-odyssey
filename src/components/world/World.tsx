@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Sky, Cloud, Clouds, Stars } from "@react-three/drei";
-import { EffectComposer, Bloom, Vignette, ChromaticAberration } from "@react-three/postprocessing";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import Terrain from "./Terrain";
 import Player from "./Player";
@@ -63,15 +63,15 @@ const KEYS: Keyframe[] = [
     starsOpacity: 0.25, bloom: 1.0,
     turbidity: 8, rayleigh: 3,
   },
-  { // noon
+  { // noon - bright Minecraft daylight
     t: 0.72,
-    sun: [40, 90, -20], sunColor: "#fff5d6", sunIntensity: 1.7,
-    ambient: "#ffeec8", ambientIntensity: 0.55,
-    hemiSky: "#bfe2ff", hemiGround: "#3b2e1a", hemiIntensity: 0.65,
-    fog: "#cfe6ff", fogDensity: 0.006,
-    rim: "#fff1c2", rimIntensity: 0.4,
-    starsOpacity: 0, bloom: 0.7,
-    turbidity: 4, rayleigh: 1.2,
+    sun: [40, 90, -20], sunColor: "#ffffff", sunIntensity: 1.35,
+    ambient: "#ffffff", ambientIntensity: 0.85,
+    hemiSky: "#69b7ff", hemiGround: "#7a5a3a", hemiIntensity: 0.9,
+    fog: "#7ec0ff", fogDensity: 0.0015,
+    rim: "#ffffff", rimIntensity: 0.2,
+    starsOpacity: 0, bloom: 0.18,
+    turbidity: 2, rayleigh: 0.6,
   },
   { // back to sunset
     t: 1,
@@ -256,20 +256,20 @@ function SceneContents() {
         sunPosition={[40, 90, -20]}
         inclination={0.6}
         azimuth={0.25}
-        turbidity={4}
-        rayleigh={1.2}
-        mieCoefficient={0.005}
-        mieDirectionalG={0.8}
+        turbidity={2}
+        rayleigh={0.6}
+        mieCoefficient={0.003}
+        mieDirectionalG={0.85}
       />
       <Stars ref={starsRef} radius={300} depth={50} count={1500} factor={4} fade speed={0.4} />
 
-      <ambientLight ref={ambientRef} intensity={0.55} color="#ffeec8" />
+      <ambientLight ref={ambientRef} intensity={0.85} color="#ffffff" />
       <directionalLight
         ref={sunRef}
         castShadow
         position={[40, 90, -20]}
-        intensity={1.7}
-        color="#fff5d6"
+        intensity={1.35}
+        color="#ffffff"
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-bias={-0.0005}
@@ -279,14 +279,14 @@ function SceneContents() {
         shadow-camera-top={80}
         shadow-camera-bottom={-80}
       />
-      <hemisphereLight ref={hemiRef} args={["#bfe2ff", "#3b2e1a", 0.65]} />
-      <pointLight ref={rimRef} position={[40, 115, -20]} intensity={0.4} color="#fff1c2" distance={220} decay={1.2} />
+      <hemisphereLight ref={hemiRef} args={["#69b7ff", "#7a5a3a", 0.9]} />
+      <pointLight ref={rimRef} position={[40, 115, -20]} intensity={0.2} color="#ffffff" distance={220} decay={1.2} />
 
       <Clouds material={THREE.MeshBasicMaterial}>
-        <Cloud seed={1} position={[20, 35, -40]} bounds={[22, 4, 22]} volume={8} color="#ffffff" opacity={0.85} />
-        <Cloud seed={2} position={[-30, 40, -30]} bounds={[24, 5, 24]} volume={9} color="#ffffff" opacity={0.8} />
-        <Cloud seed={3} position={[10, 32, 30]} bounds={[20, 4, 20]} volume={8} color="#f5faff" opacity={0.75} />
-        <Cloud seed={4} position={[-50, 45, -70]} bounds={[28, 6, 28]} volume={10} color="#ffffff" opacity={0.9} />
+        <Cloud seed={1} position={[20, 38, -40]} bounds={[18, 2, 18]} volume={5} color="#ffffff" opacity={1} />
+        <Cloud seed={2} position={[-30, 42, -30]} bounds={[20, 2, 20]} volume={6} color="#ffffff" opacity={1} />
+        <Cloud seed={3} position={[10, 36, 30]} bounds={[16, 2, 16]} volume={5} color="#ffffff" opacity={1} />
+        <Cloud seed={4} position={[-50, 46, -70]} bounds={[24, 2, 24]} volume={6} color="#ffffff" opacity={1} />
       </Clouds>
 
       <Terrain size={90} />
@@ -301,10 +301,8 @@ function SceneContents() {
       <Player />
       <CinematicIntro />
 
-      <EffectComposer multisampling={0}>
-        <Bloom ref={bloomRef} intensity={1.1} luminanceThreshold={0.4} luminanceSmoothing={0.3} mipmapBlur />
-        <ChromaticAberration offset={[0.0008, 0.0012] as any} radialModulation modulationOffset={0.5} />
-        <Vignette eskil={false} offset={0.15} darkness={0.85} />
+      <EffectComposer multisampling={4}>
+        <Bloom ref={bloomRef} intensity={0.18} luminanceThreshold={0.85} luminanceSmoothing={0.2} mipmapBlur />
       </EffectComposer>
 
       <DayNightCycle
@@ -333,9 +331,10 @@ export default function World() {
       gl={{ antialias: true, powerPreference: "high-performance" }}
       dpr={[1, 1.5]}
       camera={{ fov: 70, near: 0.1, far: 400, position: [0, 6, 14] }}
-      onCreated={({ scene }) => {
-        scene.fog = new THREE.FogExp2("#cfe6ff", 0.006);
-        scene.background = new THREE.Color("#cfe6ff");
+      onCreated={({ scene, gl }) => {
+        scene.fog = new THREE.FogExp2("#7ec0ff", 0.0015);
+        scene.background = new THREE.Color("#5fb0ff");
+        gl.toneMapping = THREE.NoToneMapping;
       }}
     >
       <Suspense fallback={null}>
