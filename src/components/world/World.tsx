@@ -6,7 +6,7 @@ import { BlendFunction, ToneMappingMode } from "postprocessing";
 import * as THREE from "three";
 import Terrain from "./Terrain";
 import Player from "./Player";
-import { SpawnArea, Village, Factory, Projects, Mountain, ContactPortal, Trees } from "./Zones";
+import { SpawnArea, Village, Factory, Projects, Mountain, ContactPortal, Trees, PlayerHouse } from "./Zones";
 import { useGame } from "@/store/game";
 
 // ----- Day/Night cycle -----
