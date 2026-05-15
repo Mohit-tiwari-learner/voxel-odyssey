@@ -298,6 +298,7 @@ function SceneContents() {
       <Terrain size={90} />
       <Trees />
       <SpawnArea />
+      <PlayerHouse />
       <Village />
       <Factory />
       <Projects />
