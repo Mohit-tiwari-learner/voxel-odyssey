@@ -340,6 +340,192 @@ const ZONES_LOCAL = {
   portal: grounded("portal"),
 } as const;
 
+/* PLAYER HOUSE — spawn cabin with bed, crafting table, furnace, chest, torches */
+export function PlayerHouse() {
+  const cx = -16, cz = 10;
+  const gy = heightAt(cx, cz) + 1;
+
+  // Materials palette
+  const OAK = "#b6824a";
+  const OAK_DARK = "#7a4f29";
+  const COBBLE = "#8a8d92";
+  const STONE_DARK = "#3e4147";
+  const ROOF = "#7a2e2e";
+  const ROOF_DARK = "#5a1f1f";
+  const PLANK_FLOOR = "#caa472";
+
+  const blocks: React.ReactElement[] = [];
+  const W = 7, D = 6, H = 4;
+
+  // Floor (planks)
+  for (let x = 0; x < W; x++) {
+    for (let z = 0; z < D; z++) {
+      blocks.push(<Block key={`fl-${x}-${z}`} position={[x - 3, 0, z - 2]} color={PLANK_FLOOR} />);
+    }
+  }
+  // Walls
+  for (let x = -3; x <= 3; x++) {
+    for (let y = 1; y <= H; y++) {
+      // back wall
+      blocks.push(<Block key={`bw-${x}-${y}`} position={[x, y, -3]} color={x === 0 || x === 0 ? OAK : OAK_DARK} />);
+      // front wall — leave doorway at x=0,y=1,2
+      if (!(x === 0 && (y === 1 || y === 2))) {
+        // window slot at x=±2 y=2
+        if ((x === -2 || x === 2) && y === 2) {
+          blocks.push(
+            <mesh key={`gw-${x}-${y}`} position={[x, y, 3]} castShadow receiveShadow geometry={SHADED_BOX}>
+              <meshPhysicalMaterial color="#b8e8ff" transmission={0.85} thickness={0.4} roughness={0.05} ior={1.45} transparent opacity={0.55} />
+            </mesh>
+          );
+        } else {
+          blocks.push(<Block key={`fw-${x}-${y}`} position={[x, y, 3]} color={x % 2 === 0 ? OAK : OAK_DARK} />);
+        }
+      }
+    }
+  }
+  for (let z = -2; z <= 2; z++) {
+    for (let y = 1; y <= H; y++) {
+      // window on left wall y=2 z=0
+      if (z === 0 && y === 2) {
+        blocks.push(
+          <mesh key={`glw-${z}-${y}`} position={[-3, y, z]} castShadow receiveShadow geometry={SHADED_BOX}>
+            <meshPhysicalMaterial color="#b8e8ff" transmission={0.85} thickness={0.4} roughness={0.05} ior={1.45} transparent opacity={0.55} />
+          </mesh>
+        );
+        blocks.push(
+          <mesh key={`grw-${z}-${y}`} position={[3, y, z]} castShadow receiveShadow geometry={SHADED_BOX}>
+            <meshPhysicalMaterial color="#b8e8ff" transmission={0.85} thickness={0.4} roughness={0.05} ior={1.45} transparent opacity={0.55} />
+          </mesh>
+        );
+      } else {
+        blocks.push(<Block key={`lw-${z}-${y}`} position={[-3, y, z]} color={z % 2 === 0 ? OAK : OAK_DARK} />);
+        blocks.push(<Block key={`rw-${z}-${y}`} position={[3, y, z]} color={z % 2 === 0 ? OAK : OAK_DARK} />);
+      }
+    }
+  }
+  // Cobblestone foundation ring
+  for (let x = -3; x <= 3; x++) {
+    blocks.push(<Block key={`fb-${x}`} position={[x, 0, -3]} color={COBBLE} />);
+    blocks.push(<Block key={`ff-${x}`} position={[x, 0, 3]} color={COBBLE} />);
+  }
+  for (let z = -2; z <= 2; z++) {
+    blocks.push(<Block key={`fl2-${z}`} position={[-3, 0, z]} color={COBBLE} />);
+    blocks.push(<Block key={`fr2-${z}`} position={[3, 0, z]} color={COBBLE} />);
+  }
+  // Pitched roof — two slopes meeting at center
+  for (let z = -3; z <= 3; z++) {
+    const offset = Math.abs(z);
+    const ry = H + 1 + (3 - offset);
+    for (let x = -3; x <= 3; x++) {
+      blocks.push(<Block key={`rf-${x}-${z}`} position={[x, ry, z]} color={offset === 0 ? ROOF_DARK : ROOF} />);
+    }
+  }
+
+  return (
+    <group position={[cx, gy, cz]}>
+      {blocks}
+
+      {/* Door frame indicators */}
+      <Block position={[-1, 1, 3]} color={OAK_DARK} />
+      <Block position={[1, 1, 3]} color={OAK_DARK} />
+
+      {/* Bed (red wool + white pillow) */}
+      <mesh position={[-2, 1.3, -2]} castShadow receiveShadow>
+        <boxGeometry args={[1.6, 0.5, 2.4]} />
+        <meshStandardMaterial color="#c43b3b" roughness={0.95} />
+      </mesh>
+      <mesh position={[-2, 1.5, -2.9]} castShadow>
+        <boxGeometry args={[1.4, 0.3, 0.5]} />
+        <meshStandardMaterial color="#f5f5f5" roughness={0.9} />
+      </mesh>
+
+      {/* Crafting table */}
+      <group position={[2, 1, -2]}>
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="#8a5a2a" roughness={0.85} />
+        </mesh>
+        <mesh position={[0, 0.51, 0]} castShadow>
+          <boxGeometry args={[1.01, 0.05, 1.01]} />
+          <meshStandardMaterial color="#3a2a1d" roughness={0.7} />
+        </mesh>
+      </group>
+
+      {/* Furnace */}
+      <group position={[1, 1, -2.4]}>
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[1, 1.2, 1]} />
+          <meshStandardMaterial color={STONE_DARK} roughness={0.9} />
+        </mesh>
+        {/* Glowing fire mouth */}
+        <mesh position={[0, -0.05, 0.51]}>
+          <planeGeometry args={[0.55, 0.4]} />
+          <meshBasicMaterial color="#ffb347" toneMapped={false} />
+        </mesh>
+        <pointLight position={[0, 0.2, 1]} color="#ff8a3c" intensity={1.6} distance={6} decay={1.6} />
+      </group>
+
+      {/* Chest */}
+      <group position={[2.1, 1, 1.5]}>
+        <mesh castShadow receiveShadow>
+          <boxGeometry args={[1.4, 0.9, 0.9]} />
+          <meshStandardMaterial color="#9b6a2c" roughness={0.85} />
+        </mesh>
+        <mesh position={[0, 0.1, 0.46]} castShadow>
+          <boxGeometry args={[0.18, 0.18, 0.05]} />
+          <meshStandardMaterial color="#3a2a1d" metalness={0.6} roughness={0.4} />
+        </mesh>
+      </group>
+
+      {/* Torches on walls */}
+      {[
+        [-2.9, 2.5, -1.5],
+        [-2.9, 2.5, 1.5],
+        [2.9, 2.5, -1.5],
+        [2.9, 2.5, 1.5],
+      ].map(([x, y, z], i) => (
+        <group key={`t-${i}`} position={[x, y, z]}>
+          <mesh>
+            <cylinderGeometry args={[0.06, 0.06, 0.5, 6]} />
+            <meshStandardMaterial color="#5a3a1d" />
+          </mesh>
+          <mesh position={[0, 0.32, 0]}>
+            <sphereGeometry args={[0.12, 8, 8]} />
+            <meshBasicMaterial color="#ffd27a" toneMapped={false} />
+          </mesh>
+          <pointLight color="#ffb05a" intensity={1.2} distance={7} decay={1.6} position={[0, 0.4, 0]} />
+        </group>
+      ))}
+
+      {/* Outdoor lantern + path stones */}
+      <group position={[0, 0.5, 5]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[0.08, 0.08, 2.5, 6]} />
+          <meshStandardMaterial color="#222" />
+        </mesh>
+        <mesh position={[0, 1.4, 0]}>
+          <boxGeometry args={[0.5, 0.5, 0.5]} />
+          <meshBasicMaterial color="#fff1b8" toneMapped={false} />
+        </mesh>
+        <pointLight position={[0, 1.4, 0]} color="#ffd27a" intensity={2.2} distance={14} decay={1.5} />
+      </group>
+
+      {/* Welcome sign */}
+      <group position={[-1.5, 1.4, 4.2]} rotation={[0, 0.2, 0]}>
+        <mesh castShadow>
+          <boxGeometry args={[1.6, 0.9, 0.08]} />
+          <meshStandardMaterial color="#8a5a2a" roughness={0.9} />
+        </mesh>
+        <Text position={[0, 0, 0.06]} fontSize={0.22} color="#fff" outlineColor="#000" outlineWidth={0.02} maxWidth={1.4} textAlign="center">
+          WELCOME{"\n"}HOME
+        </Text>
+      </group>
+
+      <ZoneLabel position={[0, 9, 0]} color="#ffd27a">SPAWN HOUSE</ZoneLabel>
+    </group>
+  );
+}
+
 /* TREES — scattered voxel trees, grounded to terrain */
 export function Trees() {
   const trees = useMemo(() => {
