@@ -534,8 +534,9 @@ export function Trees() {
   const trees = useMemo(() => {
     const arr: { x: number; z: number; y: number }[] = [];
     for (let i = 0; i < 140; i++) {
-      const x = Math.round((Math.random() - 0.5) * 160);
-      const z = Math.round((Math.random() - 0.5) * 160);
+      // Keep trees inside the 90×90 terrain footprint (half = 45)
+      const x = Math.round((Math.random() - 0.5) * 80);
+      const z = Math.round((Math.random() - 0.5) * 80);
       const skip = Object.values(ZONES).some((zo) => Math.hypot(x - zo.position[0], z - zo.position[2]) < 14);
       if (skip) continue;
       const y = heightAt(x, z);
