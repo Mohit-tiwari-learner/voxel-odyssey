@@ -405,14 +405,15 @@ export function PlayerHouse() {
       }
     }
   }
-  // Cobblestone foundation ring
+  // Cobblestone foundation ring — drop one block below the floor so it
+  // reads as a basement edge and doesn't z-fight with the plank floor.
   for (let x = -3; x <= 3; x++) {
-    blocks.push(<Block key={`fb-${x}`} position={[x, 0, -3]} color={COBBLE} />);
-    blocks.push(<Block key={`ff-${x}`} position={[x, 0, 3]} color={COBBLE} />);
+    blocks.push(<Block key={`fb-${x}`} position={[x, -1, -3]} color={COBBLE} />);
+    blocks.push(<Block key={`ff-${x}`} position={[x, -1, 3]} color={COBBLE} />);
   }
   for (let z = -2; z <= 2; z++) {
-    blocks.push(<Block key={`fl2-${z}`} position={[-3, 0, z]} color={COBBLE} />);
-    blocks.push(<Block key={`fr2-${z}`} position={[3, 0, z]} color={COBBLE} />);
+    blocks.push(<Block key={`fl2-${z}`} position={[-3, -1, z]} color={COBBLE} />);
+    blocks.push(<Block key={`fr2-${z}`} position={[3, -1, z]} color={COBBLE} />);
   }
   // Pitched roof — two slopes meeting at center
   for (let z = -3; z <= 3; z++) {
