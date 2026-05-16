@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { ZONES } from "@/store/game";
 
@@ -180,21 +181,70 @@ export default function Terrain({ size = 180 }: Props) {
 }
 
 function Water() {
-  const mat = useMemo(() => {
-    const m = new THREE.MeshStandardMaterial({
-      color: new THREE.Color("#3a8fb5"),
-      transparent: true,
-      opacity: 0.78,
-      roughness: 0.15,
-      metalness: 0.6,
-      envMapIntensity: 1,
-    });
-    return m;
-  }, []);
+  const ref = useRef<THREE.Mesh>(null);
+  const matRef = useRef<THREE.ShaderMaterial>(null);
+
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uShallow: { value: new THREE.Color("#7fd6e8") },
+      uDeep: { value: new THREE.Color("#1a4a6e") },
+    }),
+    []
+  );
+
+  useFrame((_, dt) => {
+    if (matRef.current) {
+      (matRef.current.uniforms.uTime.value as number) += dt;
+    }
+  });
+
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.45, 0]} receiveShadow>
-      <planeGeometry args={[180, 180, 1, 1]} />
-      <primitive object={mat} attach="material" />
+    <mesh
+      ref={ref}
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={[0, 0.05, 0]}
+      receiveShadow
+    >
+      {/* Match terrain footprint (90×90) with enough subdivisions for waves */}
+      <planeGeometry args={[90, 90, 80, 80]} />
+      <shaderMaterial
+        ref={matRef}
+        transparent
+        uniforms={uniforms}
+        vertexShader={`
+          uniform float uTime;
+          varying vec2 vUv;
+          varying float vWave;
+          void main() {
+            vUv = uv;
+            vec3 p = position;
+            float w =
+              sin(p.x * 0.6 + uTime * 1.2) * 0.08 +
+              cos(p.y * 0.5 + uTime * 0.9) * 0.08 +
+              sin((p.x + p.y) * 0.3 + uTime * 0.6) * 0.05;
+            p.z += w;
+            vWave = w;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+          }
+        `}
+        fragmentShader={`
+          uniform float uTime;
+          uniform vec3 uShallow;
+          uniform vec3 uDeep;
+          varying vec2 vUv;
+          varying float vWave;
+          float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+          void main() {
+            // animated sparkle/foam stripes
+            float stripes = sin((vUv.x + vUv.y) * 80.0 + uTime * 1.5) * 0.5 + 0.5;
+            float foam = smoothstep(0.85, 1.0, stripes) * 0.25;
+            vec3 col = mix(uDeep, uShallow, 0.55 + vWave * 1.5);
+            col += foam;
+            gl_FragColor = vec4(col, 0.78);
+          }
+        `}
+      />
     </mesh>
   );
 }

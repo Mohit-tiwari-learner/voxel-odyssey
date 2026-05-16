@@ -89,8 +89,8 @@ export function SpawnArea() {
       </Float>
       <ZoneLabel position={[0, 7, 0]} color="#f6c453">PORTFOLIO</ZoneLabel>
       <Sparkles count={60} scale={[20, 6, 20]} size={3} color="#fff5c2" speed={0.4} position={[0, 4, 0]} />
-      {/* NPC robot guide */}
-      <group position={[3, 2.5, 6]}>
+      {/* NPC robot guide — grounded to terrain */}
+      <group position={[3, heightAt(3, 6) + 1, 6]}>
         <Block position={[0,1,0]} color="#bbbec4" />
         <Block position={[0,0,0]} color="#7c8087" />
         <Block position={[-0.6,0.9,0.51]} color="#42e2f5" emissive="#42e2f5" size={0.2} />
@@ -329,7 +329,9 @@ import { heightAt } from "./Terrain";
 
 function grounded(id: keyof typeof ZONES): [number, number, number] {
   const [x, , z] = ZONES[id].position;
-  return [x, heightAt(x, z) + 1, z];
+  // Terrain top of block 'h' is at y = h + 0.5. Components place their first
+  // row at local y=1 (bottom at group_y + 0.5), so group_y = heightAt(x,z).
+  return [x, heightAt(x, z), z];
 }
 
 const ZONES_LOCAL = {
@@ -403,14 +405,15 @@ export function PlayerHouse() {
       }
     }
   }
-  // Cobblestone foundation ring
+  // Cobblestone foundation ring — drop one block below the floor so it
+  // reads as a basement edge and doesn't z-fight with the plank floor.
   for (let x = -3; x <= 3; x++) {
-    blocks.push(<Block key={`fb-${x}`} position={[x, 0, -3]} color={COBBLE} />);
-    blocks.push(<Block key={`ff-${x}`} position={[x, 0, 3]} color={COBBLE} />);
+    blocks.push(<Block key={`fb-${x}`} position={[x, -1, -3]} color={COBBLE} />);
+    blocks.push(<Block key={`ff-${x}`} position={[x, -1, 3]} color={COBBLE} />);
   }
   for (let z = -2; z <= 2; z++) {
-    blocks.push(<Block key={`fl2-${z}`} position={[-3, 0, z]} color={COBBLE} />);
-    blocks.push(<Block key={`fr2-${z}`} position={[3, 0, z]} color={COBBLE} />);
+    blocks.push(<Block key={`fl2-${z}`} position={[-3, -1, z]} color={COBBLE} />);
+    blocks.push(<Block key={`fr2-${z}`} position={[3, -1, z]} color={COBBLE} />);
   }
   // Pitched roof — two slopes meeting at center
   for (let z = -3; z <= 3; z++) {
@@ -531,8 +534,9 @@ export function Trees() {
   const trees = useMemo(() => {
     const arr: { x: number; z: number; y: number }[] = [];
     for (let i = 0; i < 140; i++) {
-      const x = Math.round((Math.random() - 0.5) * 160);
-      const z = Math.round((Math.random() - 0.5) * 160);
+      // Keep trees inside the 90×90 terrain footprint (half = 45)
+      const x = Math.round((Math.random() - 0.5) * 80);
+      const z = Math.round((Math.random() - 0.5) * 80);
       const skip = Object.values(ZONES).some((zo) => Math.hypot(x - zo.position[0], z - zo.position[2]) < 14);
       if (skip) continue;
       const y = heightAt(x, z);
@@ -544,7 +548,8 @@ export function Trees() {
   return (
     <group>
       {trees.map((t, i) => (
-        <group key={i} position={[t.x, t.y + 1, t.z]}>
+        // group origin sits at terrain top; trunk block local y=1 → bottom flush with ground
+        <group key={i} position={[t.x, t.y, t.z]}>
           <Block position={[0, 1, 0]} color="#5a3a1d" />
           <Block position={[0, 2, 0]} color="#5a3a1d" />
           <Block position={[0, 3, 0]} color="#3f7a3a" size={2.2} />
