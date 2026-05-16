@@ -89,8 +89,8 @@ export function SpawnArea() {
       </Float>
       <ZoneLabel position={[0, 7, 0]} color="#f6c453">PORTFOLIO</ZoneLabel>
       <Sparkles count={60} scale={[20, 6, 20]} size={3} color="#fff5c2" speed={0.4} position={[0, 4, 0]} />
-      {/* NPC robot guide */}
-      <group position={[3, 2.5, 6]}>
+      {/* NPC robot guide — grounded to terrain */}
+      <group position={[3, heightAt(3, 6) + 1, 6]}>
         <Block position={[0,1,0]} color="#bbbec4" />
         <Block position={[0,0,0]} color="#7c8087" />
         <Block position={[-0.6,0.9,0.51]} color="#42e2f5" emissive="#42e2f5" size={0.2} />
