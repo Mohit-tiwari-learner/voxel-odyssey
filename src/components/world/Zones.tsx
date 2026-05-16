@@ -547,7 +547,8 @@ export function Trees() {
   return (
     <group>
       {trees.map((t, i) => (
-        <group key={i} position={[t.x, t.y + 1, t.z]}>
+        // group origin sits at terrain top; trunk block local y=1 → bottom flush with ground
+        <group key={i} position={[t.x, t.y, t.z]}>
           <Block position={[0, 1, 0]} color="#5a3a1d" />
           <Block position={[0, 2, 0]} color="#5a3a1d" />
           <Block position={[0, 3, 0]} color="#3f7a3a" size={2.2} />
