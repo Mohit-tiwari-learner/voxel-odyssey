@@ -329,7 +329,9 @@ import { heightAt } from "./Terrain";
 
 function grounded(id: keyof typeof ZONES): [number, number, number] {
   const [x, , z] = ZONES[id].position;
-  return [x, heightAt(x, z) + 1, z];
+  // Terrain top of block 'h' is at y = h + 0.5. Components place their first
+  // row at local y=1 (bottom at group_y + 0.5), so group_y = heightAt(x,z).
+  return [x, heightAt(x, z), z];
 }
 
 const ZONES_LOCAL = {
