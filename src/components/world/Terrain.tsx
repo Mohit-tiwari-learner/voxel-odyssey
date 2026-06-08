@@ -9,14 +9,29 @@ function rand(x: number, z: number) {
   return s - Math.floor(s);
 }
 
-// Flatten plateaus around each zone so structures sit on solid, level ground
+// Flatten plateaus around each zone so structures sit on solid, level ground.
+// The mountain is reshaped into a wide climbable dome (peak ≈ 10, base ≈ 1
+// at radius 22) so the player can walk up without jumping or clipping.
 function plateauAdjust(x: number, z: number, base: number) {
   let h = base;
   for (const zone of Object.values(ZONES)) {
     const [zx, , zz] = zone.position;
     const d = Math.hypot(x - zx, z - zz);
+
+    if (zone.id === "mountain") {
+      // Cosine dome: smooth peak that slopes gently outward.
+      const R = 22;
+      if (d < R) {
+        const t = 1 - d / R; // 1 at center, 0 at base
+        const dome = 1 + 9 * (0.5 - 0.5 * Math.cos(Math.PI * t)); // 1..10
+        const blend = Math.min(1, (R - d) / 6);
+        h = h * (1 - blend) + dome * blend;
+      }
+      continue;
+    }
+
     if (d < 16) {
-      const target = zone.id === "mountain" ? 6 : zone.id === "portal" ? -1 : 1;
+      const target = zone.id === "portal" ? -1 : 1;
       const blend = Math.min(1, (16 - d) / 12);
       h = h * (1 - blend) + target * blend;
     }
