@@ -30,6 +30,19 @@ function plateauAdjust(x: number, z: number, base: number) {
       continue;
     }
 
+    if (zone.id === "factory") {
+      // Stepped pyramid under the Skills core — matches the visible cobble
+      // stairs in Zones.tsx so the player actually climbs them.
+      const dx = Math.abs(x - zx);
+      const dz = Math.abs(z - zz);
+      const ring = Math.max(dx, dz);
+      if (ring <= 3) {
+        const stepH = 4 - ring; // ring0=4, ring1=3, ring2=2, ring3=1
+        h = Math.max(h, stepH);
+        continue;
+      }
+    }
+
     if (d < 16) {
       const target = zone.id === "portal" ? -1 : 1;
       const blend = Math.min(1, (16 - d) / 12);
