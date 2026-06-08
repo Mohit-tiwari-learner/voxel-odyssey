@@ -206,8 +206,9 @@ function Water() {
       position={[0, 0.05, 0]}
       receiveShadow
     >
-      {/* Match terrain footprint (90×90) with enough subdivisions for waves */}
-      <planeGeometry args={[90, 90, 80, 80]} />
+      {/* Match terrain footprint with enough subdivisions for waves */}
+      <planeGeometry args={[110, 110, 96, 96]} />
+
       <shaderMaterial
         ref={matRef}
         transparent

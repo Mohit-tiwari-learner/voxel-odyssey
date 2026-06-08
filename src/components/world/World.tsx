@@ -295,7 +295,7 @@ function SceneContents() {
         <Cloud seed={4} position={[-50, 46, -70]} bounds={[24, 2, 24]} volume={6} color="#ffffff" opacity={1} />
       </Clouds>
 
-      <Terrain size={90} />
+      <Terrain size={110} />
       <Trees />
       <SpawnArea />
       <PlayerHouse />
