@@ -134,6 +134,23 @@ export function Village() {
 export function Factory() {
   const base = ZONES_LOCAL.factory;
   const skills = ["React", "Node.js", "Python", "Three.js", "AI/ML", "Mongo"];
+  // Stepped cobble pyramid leading from ground to the central core platform.
+  // 4 steps × 1 block tall — each step is walkable (player JUMP allows ≤1.1u).
+  const stairs: React.ReactElement[] = [];
+  for (let s = 0; s < 4; s++) {
+    const inner = s;            // shrinking ring toward center
+    const outer = 3 - s;        // top step is 1×1
+    for (let x = -outer; x <= outer; x++) {
+      for (let z = -outer; z <= outer; z++) {
+        const onRing = Math.max(Math.abs(x), Math.abs(z)) > inner;
+        if (onRing) {
+          stairs.push(
+            <Block key={`st-${s}-${x}-${z}`} position={[x, s + 1, z]} color={s % 2 ? "#7c8087" : "#8a8d92"} />
+          );
+        }
+      }
+    }
+  }
   return (
     <group position={base}>
       {skills.map((s, i) => {
@@ -143,8 +160,9 @@ export function Factory() {
         const z = Math.sin(angle) * r;
         return <Machine key={s} label={s} position={[x, 1, z]} hue={i / skills.length} />;
       })}
-      {/* Central core */}
-      <CoreOrb position={[0, 4, 0]} />
+      {stairs}
+      {/* Central core sits just above the top stair (y=4) */}
+      <CoreOrb position={[0, 5.2, 0]} />
       <ZoneLabel position={[0, 10, 0]} color="#fb8500">SKILLS FACTORY</ZoneLabel>
     </group>
   );
