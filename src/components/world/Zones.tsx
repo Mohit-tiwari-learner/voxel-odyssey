@@ -134,6 +134,23 @@ export function Village() {
 export function Factory() {
   const base = ZONES_LOCAL.factory;
   const skills = ["React", "Node.js", "Python", "Three.js", "AI/ML", "Mongo"];
+  // Stepped cobble pyramid leading from ground to the central core platform.
+  // 4 steps × 1 block tall — each step is walkable (player JUMP allows ≤1.1u).
+  const stairs: React.ReactElement[] = [];
+  for (let s = 0; s < 4; s++) {
+    const inner = s;            // shrinking ring toward center
+    const outer = 3 - s;        // top step is 1×1
+    for (let x = -outer; x <= outer; x++) {
+      for (let z = -outer; z <= outer; z++) {
+        const onRing = Math.max(Math.abs(x), Math.abs(z)) > inner;
+        if (onRing) {
+          stairs.push(
+            <Block key={`st-${s}-${x}-${z}`} position={[x, s + 1, z]} color={s % 2 ? "#7c8087" : "#8a8d92"} />
+          );
+        }
+      }
+    }
+  }
   return (
     <group position={base}>
       {skills.map((s, i) => {
@@ -143,8 +160,9 @@ export function Factory() {
         const z = Math.sin(angle) * r;
         return <Machine key={s} label={s} position={[x, 1, z]} hue={i / skills.length} />;
       })}
-      {/* Central core */}
-      <CoreOrb position={[0, 4, 0]} />
+      {stairs}
+      {/* Central core sits just above the top stair (y=4) */}
+      <CoreOrb position={[0, 5.2, 0]} />
       <ZoneLabel position={[0, 10, 0]} color="#fb8500">SKILLS FACTORY</ZoneLabel>
     </group>
   );
@@ -229,32 +247,55 @@ export function Projects() {
   );
 }
 
-/* MOUNTAIN — voxel pyramid + checkpoints */
+/* MOUNTAIN — terrain is a climbable dome (see Terrain.plateauAdjust).
+ * We only add a snow cap, summit flag, checkpoint banners and decoration. */
 export function Mountain() {
   const base = ZONES_LOCAL.mountain;
-  const layers = 10;
   const blocks: React.ReactElement[] = [];
-  for (let y = 0; y < layers; y++) {
-    const w = layers - y;
-    for (let x = -w; x <= w; x++) {
-      for (let z = -w; z <= w; z++) {
-        if (Math.abs(x) === w || Math.abs(z) === w || y === layers - 1) {
-          const c = y > 7 ? "#eef4ff" : y > 4 ? "#7c8087" : "#5a4632";
-          blocks.push(<Block key={`${x}-${y}-${z}`} position={[x, y + 1, z]} color={c} />);
-        }
+
+  // Snow cap — a small 5×5 platform sitting flush on the dome's summit.
+  for (let x = -2; x <= 2; x++) {
+    for (let z = -2; z <= 2; z++) {
+      if (Math.hypot(x, z) <= 2.4) {
+        blocks.push(<Block key={`cap-${x}-${z}`} position={[x, 1, z]} color="#eef4ff" />);
       }
     }
   }
+  // Cairn / checkpoint stones at three altitudes around the dome.
+  const cairns: [number, number, string][] = [
+    [-6, -4, "#7c8087"],
+    [5, -7, "#7c8087"],
+    [-2, 8, "#7c8087"],
+  ];
+
   return (
     <group position={base}>
       {blocks}
+      {cairns.map(([cx, cz, c], i) => {
+        const cy = heightAt(base[0] + cx, base[2] + cz) - base[1];
+        return (
+          <group key={`cn-${i}`} position={[cx, cy, cz]}>
+            <Block position={[0, 1, 0]} color={c} />
+            <Block position={[0, 2, 0]} color="#5b6066" size={0.6} />
+          </group>
+        );
+      })}
+      {/* Summit flag */}
+      <mesh position={[0, 3.5, 0]} castShadow>
+        <cylinderGeometry args={[0.06, 0.06, 4, 6]} />
+        <meshStandardMaterial color="#3a2a1d" />
+      </mesh>
+      <mesh position={[0.7, 4.7, 0]} castShadow>
+        <planeGeometry args={[1.2, 0.7]} />
+        <meshStandardMaterial color="#c43b3b" side={THREE.DoubleSide} />
+      </mesh>
       <Float floatIntensity={1} speed={1}>
-        <Text position={[0, layers + 4, 0]} fontSize={1.2} color="#fff5c2" outlineColor="#000" outlineWidth={0.06}>
+        <Text position={[0, 7, 0]} fontSize={1.2} color="#fff5c2" outlineColor="#000" outlineWidth={0.06}>
           EXPERIENCE
         </Text>
       </Float>
-      <Sparkles count={40} scale={[10, 12, 10]} size={3} color="#fff5c2" speed={0.6} position={[0, layers, 0]} />
-      <ZoneLabel position={[0, layers + 8, 0]} color="#cdb4db">EXPERIENCE PEAK</ZoneLabel>
+      <Sparkles count={40} scale={[10, 6, 10]} size={3} color="#fff5c2" speed={0.6} position={[0, 3, 0]} />
+      <ZoneLabel position={[0, 11, 0]} color="#cdb4db">EXPERIENCE PEAK</ZoneLabel>
     </group>
   );
 }
