@@ -239,7 +239,7 @@ function Water() {
     <mesh
       ref={ref}
       rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, 0.05, 0]}
+      position={[0, -0.4, 0]}
       receiveShadow
     >
       {/* Match terrain footprint with enough subdivisions for waves */}

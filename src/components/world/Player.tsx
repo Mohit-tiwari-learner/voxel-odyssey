@@ -65,9 +65,24 @@ export default function Player() {
     }
     velocity.current.y -= GRAVITY * d;
 
+    // Save previous horizontal position so we can revert if we'd "wall-clip" up
+    const prevX = camera.position.x;
+    const prevZ = camera.position.z;
+
     camera.position.x += velocity.current.x * d;
-    camera.position.y += velocity.current.y * d;
     camera.position.z += velocity.current.z * d;
+
+    // Block horizontal motion into voxel walls — only auto-step up if the rise
+    // is at most ~1 block (so the player can't fly up a tower by walking).
+    const standY = camera.position.y - 2.6;
+    const groundAhead = heightAt(Math.round(camera.position.x), Math.round(camera.position.z));
+    const MAX_STEP = 1.1;
+    if (onGround.current && groundAhead - standY > MAX_STEP) {
+      camera.position.x = prevX;
+      camera.position.z = prevZ;
+    }
+
+    camera.position.y += velocity.current.y * d;
 
     // ground collision via terrain heightmap
     const ground = heightAt(Math.round(camera.position.x), Math.round(camera.position.z)) + 2.6;
@@ -75,6 +90,8 @@ export default function Player() {
       camera.position.y = ground;
       velocity.current.y = 0;
       onGround.current = true;
+    } else {
+      onGround.current = false;
     }
 
     // zone detection
