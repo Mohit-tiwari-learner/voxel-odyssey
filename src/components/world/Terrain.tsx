@@ -32,13 +32,21 @@ function plateauAdjust(x: number, z: number, base: number) {
 
     if (zone.id === "factory") {
       // Stepped pyramid under the Skills core — matches the visible cobble
-      // stairs in Zones.tsx so the player actually climbs them.
+      // stairs in Zones.tsx so the player actually climbs them. We FORCE
+      // the height (no max-blend with noise) so each ring is a clean 1u step,
+      // and ring=4 is flattened to ground level so the perimeter isn't a cliff.
       const dx = Math.abs(x - zx);
       const dz = Math.abs(z - zz);
       const ring = Math.max(dx, dz);
-      if (ring <= 3) {
-        const stepH = 4 - ring; // ring0=4, ring1=3, ring2=2, ring3=1
-        h = Math.max(h, stepH);
+      if (ring <= 4) {
+        const stepH = ring <= 3 ? 4 - ring : 0; // 4,3,2,1,0
+        h = stepH;
+        continue;
+      }
+      // Blend ring 5-7 back into natural terrain to avoid a hard seam
+      if (ring <= 7) {
+        const blend = (ring - 4) / 3; // 0..1
+        h = 0 * (1 - blend) + h * blend;
         continue;
       }
     }
