@@ -570,31 +570,91 @@ export function PlayerHouse() {
   );
 }
 
-/* TREES — scattered voxel trees, grounded to terrain */
+/* TREES, ROCKS & BUSHES — scattered nature, all grounded to terrain.
+ * - Trees only on grass (1 ≤ h ≤ 5), never in water or on stone/snow.
+ * - Varied canopy shapes (oak / pine) and trunk heights for realism.
+ * - Rocks cluster on stone (h ≥ 5), bushes on grass.
+ */
 export function Trees() {
-  const trees = useMemo(() => {
-    const arr: { x: number; z: number; y: number }[] = [];
-    for (let i = 0; i < 140; i++) {
-      // Keep trees inside the 90×90 terrain footprint (half = 45)
-      const x = Math.round((Math.random() - 0.5) * 80);
-      const z = Math.round((Math.random() - 0.5) * 80);
-      const skip = Object.values(ZONES).some((zo) => Math.hypot(x - zo.position[0], z - zo.position[2]) < 14);
-      if (skip) continue;
+  const { trees, rocks, bushes } = useMemo(() => {
+    const trees: { x: number; z: number; y: number; kind: "oak" | "pine"; h: number; seed: number }[] = [];
+    const rocks: { x: number; z: number; y: number; s: number }[] = [];
+    const bushes: { x: number; z: number; y: number }[] = [];
+    let seed = 1;
+    const rng = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+
+    for (let i = 0; i < 260; i++) {
+      const x = Math.round((rng() - 0.5) * 90);
+      const z = Math.round((rng() - 0.5) * 90);
+      // Keep clear of every zone so nothing pokes through buildings
+      if (Object.values(ZONES).some((zo) => Math.hypot(x - zo.position[0], z - zo.position[2]) < 12)) continue;
+      // Keep clear of the player house
+      if (Math.hypot(x - -16, z - 10) < 8) continue;
       const y = heightAt(x, z);
-      if (y < 0 || y > 6) continue;
-      arr.push({ x, z, y });
+
+      if (y >= 1 && y <= 5) {
+        // Grass biome — trees + bushes
+        const r = rng();
+        if (r < 0.78) {
+          trees.push({
+            x, z, y,
+            kind: rng() > 0.55 ? "pine" : "oak",
+            h: 3 + Math.floor(rng() * 3), // 3..5 trunk
+            seed: Math.floor(rng() * 9999),
+          });
+        } else {
+          bushes.push({ x, z, y });
+        }
+      } else if (y >= 6 && y <= 9) {
+        // Foothills — small rocks
+        if (rng() > 0.5) rocks.push({ x, z, y, s: 0.8 + rng() * 0.6 });
+      }
     }
-    return arr;
+    return { trees, rocks, bushes };
   }, []);
+
   return (
     <group>
-      {trees.map((t, i) => (
-        // group origin sits at terrain top; trunk block local y=1 → bottom flush with ground
-        <group key={i} position={[t.x, t.y, t.z]}>
-          <Block position={[0, 1, 0]} color="#5a3a1d" />
-          <Block position={[0, 2, 0]} color="#5a3a1d" />
-          <Block position={[0, 3, 0]} color="#3f7a3a" size={2.2} />
-          <Block position={[0, 4, 0]} color="#5fa85a" size={1.6} />
+      {trees.map((t, i) => {
+        const blocks: React.ReactElement[] = [];
+        // trunk
+        for (let h = 0; h < t.h; h++) {
+          blocks.push(<Block key={`tr-${h}`} position={[0, h + 1, 0]} color="#5a3a1d" />);
+        }
+        if (t.kind === "pine") {
+          // Conifer: stacked shrinking leaf layers above trunk
+          const top = t.h + 1;
+          blocks.push(<Block key="p1" position={[0, top, 0]} color="#2f6a32" size={2.4} />);
+          blocks.push(<Block key="p2" position={[0, top + 1, 0]} color="#3f7a3a" size={1.8} />);
+          blocks.push(<Block key="p3" position={[0, top + 2, 0]} color="#5fa85a" size={1.1} />);
+        } else {
+          // Oak: bushy round canopy as a 3x3x2 cluster
+          const ly = t.h + 1;
+          for (let lx = -1; lx <= 1; lx++) {
+            for (let lz = -1; lz <= 1; lz++) {
+              for (let ldy = 0; ldy <= 1; ldy++) {
+                // Skip corners of the top layer for a rounder silhouette
+                if (ldy === 1 && Math.abs(lx) === 1 && Math.abs(lz) === 1) continue;
+                const tint = (lx + lz + ldy + t.seed) % 3 === 0 ? "#3f7a3a" : "#5fa85a";
+                blocks.push(<Block key={`o-${lx}-${lz}-${ldy}`} position={[lx, ly + ldy, lz]} color={tint} />);
+              }
+            }
+          }
+        }
+        return <group key={`t-${i}`} position={[t.x, t.y, t.z]}>{blocks}</group>;
+      })}
+
+      {rocks.map((r, i) => (
+        <group key={`rk-${i}`} position={[r.x, r.y, r.z]}>
+          <Block position={[0, 1, 0]} color="#7c8087" size={r.s} />
+          {r.s > 1.1 && <Block position={[0.4, 1.6, 0.2]} color="#5b6066" size={r.s * 0.6} />}
+        </group>
+      ))}
+
+      {bushes.map((b, i) => (
+        <group key={`bu-${i}`} position={[b.x, b.y, b.z]}>
+          <Block position={[0, 0.8, 0]} color="#3f7a3a" size={0.9} />
+          <Block position={[0.3, 1.2, 0.1]} color="#5fa85a" size={0.6} />
         </group>
       ))}
     </group>
