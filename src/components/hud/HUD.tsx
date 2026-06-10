@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { useGame, ZONES, type ZoneId } from "@/store/game";
-import heroBg from "@/assets/hero-minecraft.jpg";
+import heroAsset from "@/assets/blockfolio-hero.png.asset.json";
+import { Settings, User, Newspaper, Globe, BookOpen, Brush, MessageSquare, Play, DoorOpen } from "lucide-react";
+
+const heroBg = heroAsset.url;
 
 const ZONE_CONTENT: Record<Exclude<ZoneId, "spawn">, { title: string; body: string }> = {
   village: {
@@ -160,149 +163,160 @@ export default function HUD() {
 }
 
 function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boolean }) {
-  // Big chunky Minecraft-style logo letters
-  const logoStyle: React.CSSProperties = {
-    fontFamily: 'var(--font-pixel)',
-    color: '#e8e8e8',
-    background:
-      'linear-gradient(180deg, #f6f6f6 0%, #c7c7c7 38%, #8a8a8a 55%, #5e5e5e 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    textShadow:
-      '0 4px 0 rgba(0,0,0,0.55), 0 8px 0 rgba(0,0,0,0.45), 0 14px 28px rgba(0,0,0,0.6)',
-    filter:
-      'drop-shadow(0 3px 0 #2a2a2a) drop-shadow(0 6px 0 #1a1a1a)',
-    letterSpacing: '0.08em',
-    lineHeight: 1,
-    transform: 'rotate(-2deg)',
-  };
-
   return (
     <div className="fixed inset-0 z-50 overflow-hidden text-white">
-      {/* Hero Minecraft-style background image */}
+      {/* Full-bleed hero image (BLOCKFOLIO logo + scene baked in) */}
       <img
         src={heroBg}
-        alt=""
-        aria-hidden
+        alt="Blockfolio — A Voxel Portfolio Experience"
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ imageRendering: 'pixelated' }}
-      />
-      {/* Subtle vignette + readability overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'radial-gradient(ellipse at center, rgba(0,0,0,0) 50%, rgba(0,0,0,0.45) 100%), linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.35) 100%)',
-        }}
+        style={{ imageRendering: "auto" }}
       />
 
-      {/* Foreground UI */}
-      <div className="relative h-full w-full flex flex-col items-center px-6 text-center">
-        {/* Top: huge tilted logo */}
-        <div className="mt-[5vh] md:mt-[6vh] anim-blockfall">
-          <h1
-            className="text-7xl md:text-9xl lg:text-[11rem]"
-            style={logoStyle}
-          >
-            BLOCKFOLIO
-          </h1>
-          <div
-            className="mt-2 pixel-text text-xs md:text-sm tracking-[0.3em]"
-            style={{
-              color: '#fff7d6',
-              textShadow: '2px 2px 0 rgba(0,0,0,0.8)',
-              transform: 'rotate(-1deg)',
-            }}
-          >
-            A VOXEL PORTFOLIO EXPERIENCE
-          </div>
-        </div>
-
-        {/* Spacer pushes button area to lower half */}
-        <div className="flex-1" />
-
-        {/* Bottom: button stack like Minecraft menu */}
-        <div className="mb-[8vh] w-full max-w-md flex flex-col items-stretch gap-3">
-          <button
-            disabled={!loaded}
-            onClick={onStart}
-            className="pixel-text text-xl md:text-2xl py-3 transition active:translate-y-[3px] disabled:opacity-60 disabled:cursor-wait"
-            style={{
-              color: '#ffffff',
-              background:
-                'linear-gradient(180deg, #b9b9b9 0%, #8f8f8f 50%, #6a6a6a 100%)',
-              border: '3px solid #2a2a2a',
-              boxShadow:
-                'inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.4), 0 6px 0 #1a1a1a, 0 10px 24px rgba(0,0,0,0.5)',
-              textShadow: '2px 2px 0 rgba(0,0,0,0.7)',
-              imageRendering: 'pixelated',
-            }}
-          >
-            {loaded ? '▶ ENTER WORLD' : 'GENERATING TERRAIN…'}
-          </button>
-
-          <div className="grid grid-cols-2 gap-3">
-            <FakeMenuButton label="Options..." />
-            <FakeMenuButton label="Quit" />
-          </div>
-        </div>
-
-        {/* Footer corners */}
-        <div
-          className="absolute bottom-2 left-3 pixel-text text-xs"
-          style={{ color: '#fff', textShadow: '2px 2px 0 rgba(0,0,0,0.8)' }}
-        >
-          Blockfolio 1.0 (Voxel Edition)
-        </div>
-        <div
-          className="absolute bottom-2 right-3 pixel-text text-xs"
-          style={{ color: '#fff', textShadow: '2px 2px 0 rgba(0,0,0,0.8)' }}
-        >
-          Copyright Mojang-style ✦ Made for the web
-        </div>
-      </div>
-
-      {/* Splash text — yellow tilted, like Minecraft */}
-      <div
-        className="absolute pointer-events-none pixel-text"
+      {/* Top-left: News tile */}
+      <button
+        className="absolute top-4 left-4 w-16 h-20 flex flex-col items-center justify-center gap-1 hover:scale-105 transition cursor-pointer"
         style={{
-          top: '14vh',
-          right: '12vw',
-          color: '#ffdc00',
-          textShadow: '2px 2px 0 rgba(80,60,0,0.9)',
-          transform: 'rotate(-18deg)',
-          fontSize: 'clamp(14px, 1.8vw, 26px)',
-          animation: 'splash-pulse 0.6s ease-in-out infinite alternate',
+          background: "linear-gradient(180deg,#3a4f5e 0%,#243340 100%)",
+          border: "2px solid rgba(0,0,0,0.6)",
+          boxShadow: "inset 0 2px 0 rgba(255,255,255,0.18), 0 4px 0 rgba(0,0,0,0.5)",
         }}
       >
-        Now with shaders!
+        <Newspaper className="w-7 h-7 text-emerald-300" />
+        <span className="pixel-text text-[11px]" style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.8)" }}>News</span>
+      </button>
+
+      {/* Top-right: Settings + Profile */}
+      <div className="absolute top-4 right-4 flex gap-2">
+        <IconChip><Settings className="w-6 h-6" /></IconChip>
+        <IconChip><User className="w-6 h-6" /></IconChip>
       </div>
 
-      <style>{`
-        @keyframes splash-pulse {
-          from { transform: rotate(-18deg) scale(1); }
-          to   { transform: rotate(-18deg) scale(1.08); }
-        }
-      `}</style>
+      {/* Bottom-right: TIP panel with creeper */}
+      <div
+        className="absolute bottom-20 right-4 max-w-[260px] px-4 py-3 flex items-start gap-3"
+        style={{
+          background: "rgba(20,30,25,0.7)",
+          border: "2px solid rgba(120,200,120,0.35)",
+          boxShadow: "inset 0 2px 0 rgba(255,255,255,0.08), 0 4px 0 rgba(0,0,0,0.4)",
+        }}
+      >
+        <div className="flex-1">
+          <div className="pixel-text text-base text-emerald-300" style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.8)" }}>TIP</div>
+          <div className="pixel-text text-xs leading-snug opacity-90">
+            Explore, create, and showcase your voxel imagination.
+          </div>
+        </div>
+        <div
+          className="w-9 h-9 flex-shrink-0"
+          style={{
+            background:
+              "linear-gradient(180deg,#4caf50 0%,#2e7d32 100%)",
+            border: "2px solid #1b3a1b",
+            imageRendering: "pixelated",
+            boxShadow: "inset -2px -2px 0 rgba(0,0,0,0.35), inset 2px 2px 0 rgba(255,255,255,0.25)",
+          }}
+          aria-label="Creeper"
+        />
+      </div>
+
+      {/* Bottom-center: Enter World + Options/Quit + icon bar */}
+      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[560px] px-4 flex flex-col items-stretch gap-3">
+        {/* Big green Enter World */}
+        <button
+          disabled={!loaded}
+          onClick={onStart}
+          className="pixel-text text-2xl py-3 flex items-center justify-center gap-3 transition active:translate-y-[3px] disabled:opacity-60 disabled:cursor-wait"
+          style={{
+            color: "#ffffff",
+            background:
+              "linear-gradient(180deg,#8bc24a 0%,#6aa838 45%,#4d8a26 100%)",
+            border: "3px solid #1f3b10",
+            boxShadow:
+              "inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.35), 0 6px 0 #1a2a0a, 0 10px 24px rgba(0,0,0,0.5)",
+            textShadow: "2px 2px 0 rgba(0,0,0,0.7)",
+          }}
+        >
+          <Play className="w-6 h-6 fill-white" />
+          {loaded ? "ENTER WORLD" : "GENERATING TERRAIN…"}
+        </button>
+
+        <div className="grid grid-cols-2 gap-3">
+          <FakeMenuButton label="OPTIONS..." icon={<Settings className="w-5 h-5" />} />
+          <FakeMenuButton label="QUIT" icon={<DoorOpen className="w-5 h-5" />} />
+        </div>
+
+        {/* Small icon row */}
+        <div className="mt-1 flex items-center justify-center gap-2">
+          <SmallIcon><Globe className="w-5 h-5" /></SmallIcon>
+          <SmallIcon><BookOpen className="w-5 h-5" /></SmallIcon>
+          <SmallIcon><Brush className="w-5 h-5" /></SmallIcon>
+          <SmallIcon><MessageSquare className="w-5 h-5" /></SmallIcon>
+        </div>
+      </div>
+
+      {/* Footers */}
+      <div
+        className="absolute bottom-3 left-4 pixel-text text-xs leading-tight"
+        style={{ color: "#fff", textShadow: "2px 2px 0 rgba(0,0,0,0.85)" }}
+      >
+        <div>Blockfolio 1.0 (Voxel Edition)</div>
+        <div className="opacity-90">Made with <span className="text-red-500">❤</span> for the community</div>
+      </div>
+      <div
+        className="absolute bottom-3 right-4 pixel-text text-xs"
+        style={{ color: "#fff", textShadow: "2px 2px 0 rgba(0,0,0,0.85)" }}
+      >
+        © 2026 Mojang-style ✦ All rights reserved
+      </div>
     </div>
   );
 }
 
-function FakeMenuButton({ label }: { label: string }) {
+function IconChip({ children }: { children: React.ReactNode }) {
   return (
     <button
-      disabled
-      className="pixel-text text-base md:text-lg py-2 cursor-not-allowed opacity-80"
+      className="w-12 h-12 flex items-center justify-center text-white/90 hover:scale-105 transition"
       style={{
-        color: '#ffffff',
-        background:
-          'linear-gradient(180deg, #9a9a9a 0%, #7a7a7a 50%, #5a5a5a 100%)',
-        border: '3px solid #2a2a2a',
-        boxShadow:
-          'inset 0 2px 0 rgba(255,255,255,0.25), inset 0 -3px 0 rgba(0,0,0,0.4), 0 4px 0 #1a1a1a',
-        textShadow: '2px 2px 0 rgba(0,0,0,0.7)',
+        background: "linear-gradient(180deg,#3a4f5e 0%,#243340 100%)",
+        border: "2px solid rgba(0,0,0,0.6)",
+        boxShadow: "inset 0 2px 0 rgba(255,255,255,0.18), 0 4px 0 rgba(0,0,0,0.5)",
       }}
     >
+      {children}
+    </button>
+  );
+}
+
+function SmallIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <button
+      className="w-11 h-11 flex items-center justify-center text-white/85 hover:text-white transition"
+      style={{
+        background: "linear-gradient(180deg,#2d3d4a 0%,#1a262f 100%)",
+        border: "2px solid rgba(0,0,0,0.6)",
+        boxShadow: "inset 0 2px 0 rgba(255,255,255,0.12), 0 3px 0 rgba(0,0,0,0.45)",
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function FakeMenuButton({ label, icon }: { label: string; icon?: React.ReactNode }) {
+  return (
+    <button
+      className="pixel-text text-lg py-2 flex items-center justify-center gap-2 opacity-95 hover:brightness-110 transition active:translate-y-[2px]"
+      style={{
+        color: "#ffffff",
+        background: "linear-gradient(180deg,#9a9a9a 0%,#7a7a7a 50%,#5a5a5a 100%)",
+        border: "3px solid #2a2a2a",
+        boxShadow:
+          "inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.4), 0 4px 0 #1a1a1a",
+        textShadow: "2px 2px 0 rgba(0,0,0,0.7)",
+      }}
+    >
+      {icon}
       {label}
     </button>
   );
