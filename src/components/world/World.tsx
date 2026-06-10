@@ -113,8 +113,9 @@ function lerpKey(a: Keyframe, b: Keyframe, k: number): Keyframe {
   const lerp = (x: number, y: number) => x + (y - x) * s;
   const lerp3 = (x: [number, number, number], y: [number, number, number]) =>
     [lerp(x[0], y[0]), lerp(x[1], y[1]), lerp(x[2], y[2])] as [number, number, number];
+  // HSL interpolation keeps twilight transitions saturated (no muddy grey midpoint).
   const mixCol = (x: string, y: string) =>
-    "#" + new THREE.Color(x).lerp(new THREE.Color(y), s).getHexString();
+    "#" + new THREE.Color(x).lerpHSL(new THREE.Color(y), s).getHexString();
   return {
     t: 0,
     sun: lerp3(a.sun, b.sun),
