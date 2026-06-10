@@ -34,7 +34,7 @@ type Keyframe = {
 };
 
 const KEYS: Keyframe[] = [
-  { // sunset
+  { // sunset — warm orange, sun on horizon
     t: 0,
     sun: [-30, 1.5, -100], sunColor: "#ff7043", sunIntensity: 1.4,
     ambient: "#ffb178", ambientIntensity: 0.35,
@@ -43,6 +43,26 @@ const KEYS: Keyframe[] = [
     rim: "#ff5e3a", rimIntensity: 2.2,
     starsOpacity: 0.2, bloom: 1.1,
     turbidity: 10, rayleigh: 4,
+  },
+  { // dusk — magenta/violet twilight, sun just below horizon
+    t: 0.10,
+    sun: [-30, -2, -100], sunColor: "#b35a86", sunIntensity: 0.75,
+    ambient: "#9968a6", ambientIntensity: 0.28,
+    hemiSky: "#7a4a8a", hemiGround: "#1a0f28", hemiIntensity: 0.48,
+    fog: "#6b3a6e", fogDensity: 0.014,
+    rim: "#c64a8a", rimIntensity: 1.3,
+    starsOpacity: 0.55, bloom: 1.25,
+    turbidity: 6, rayleigh: 2.2,
+  },
+  { // deep twilight — cool blue, last light fading
+    t: 0.18,
+    sun: [-30, -6, -100], sunColor: "#5566aa", sunIntensity: 0.35,
+    ambient: "#5a6aa0", ambientIntensity: 0.22,
+    hemiSky: "#34427a", hemiGround: "#0e1228", hemiIntensity: 0.4,
+    fog: "#1d2550", fogDensity: 0.016,
+    rim: "#6a78cc", rimIntensity: 0.9,
+    starsOpacity: 0.85, bloom: 1.35,
+    turbidity: 3, rayleigh: 1.0,
   },
   { // night
     t: 0.28,
