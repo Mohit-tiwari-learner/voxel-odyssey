@@ -49,6 +49,15 @@ export default function HUD() {
   }
 
   const zone = ZONES[currentZone];
+  const visited = Array.from(useGame.getState().unlocked).length;
+  const zoneIds = Object.keys(ZONES) as ZoneId[];
+  const slotColors = ["#f6c453", "#5ec8f0", "#fb8500", "#c77dff", "#8ecae6", "#a663cc"];
+  const panelStyle: React.CSSProperties = {
+    background: "linear-gradient(180deg, rgba(20,22,28,0.92), rgba(14,16,20,0.92))",
+    border: "1.5px solid rgba(246,196,83,0.45)",
+    borderRadius: "14px",
+    boxShadow: "0 6px 24px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
+  };
 
   return (
     <div className="pointer-events-none fixed inset-0 z-40 select-none">
@@ -57,47 +66,65 @@ export default function HUD() {
         <div className="h-3 w-3 border-2 border-white/80 shadow-[0_0_10px_rgba(0,0,0,0.6)]" />
       </div>
 
-      {/* Top quest bar */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 hud-panel px-5 py-2 anim-blockfall">
-        <div className="pixel-text text-xs uppercase opacity-70">Current Zone</div>
-        <div className="pixel-text text-xl glow-gold" style={{ color: zone.color }}>{zone.name}</div>
+      {/* Top — Current Zone */}
+      <div className="absolute top-5 left-1/2 -translate-x-1/2 anim-blockfall flex items-center gap-3 px-4 py-2.5" style={{ ...panelStyle, minWidth: 300 }}>
+        <DiamondIcon color={zone.color} />
+        <div>
+          <div className="pixel-text text-[11px] tracking-[0.22em] text-white/55">CURRENT ZONE</div>
+          <div className="pixel-text text-2xl leading-tight" style={{ color: "#f6c453", textShadow: "0 0 12px rgba(246,196,83,0.5)" }}>
+            {zone.name}
+          </div>
+        </div>
       </div>
 
       {/* Quest tracker */}
-      <div className="absolute top-4 right-4 hud-panel px-4 py-3 max-w-xs anim-blockfall">
-        <div className="pixel-text text-[10px] uppercase opacity-70 mb-1">▸ Quest</div>
-        <div className="pixel-text text-base glow-gold leading-tight">{zone.hint}</div>
-        <div className="mt-2 pixel-text text-[10px] opacity-60">
-          Visited {Array.from(useGame.getState().unlocked).length}/6 zones
+      <div className="absolute top-5 right-5 anim-blockfall px-4 py-3 max-w-[320px]" style={panelStyle}>
+        <div className="pixel-text text-[11px] tracking-[0.22em] text-white/55 mb-1">▸ QUEST</div>
+        <div className="pixel-text text-xl leading-tight" style={{ color: "#f6c453", textShadow: "0 0 10px rgba(246,196,83,0.45)" }}>
+          {zone.hint}
+        </div>
+        <div className="mt-3 h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+          <div className="h-full rounded-full" style={{
+            width: `${Math.max(6, (visited / 6) * 100)}%`,
+            background: "linear-gradient(90deg,#f6c453,#ffb22c)",
+            boxShadow: "0 0 8px rgba(246,196,83,0.7)",
+          }} />
+        </div>
+        <div className="pixel-text text-[11px] mt-1.5 text-white/55">Visited {visited}/6 zones</div>
+      </div>
+
+      {/* Controls */}
+      <div className="absolute bottom-5 left-5 anim-blockfall px-4 py-3" style={panelStyle}>
+        <div className="pixel-text text-[11px] tracking-[0.22em] text-white/55 mb-2 flex items-center gap-1.5">
+          CONTROLS <Gamepad2 className="w-3.5 h-3.5" />
+        </div>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+          <CtrlRow keys={["W","A","S","D"]} label="Move" />
+          <CtrlRow keys={[<Mouse key="m" className="w-4 h-4" />]} label="Look" />
+          <CtrlRow keys={["Shift"]} label="Sprint" wide />
+          <CtrlRow keys={["E"]} label="Interact" />
+          <CtrlRow keys={["Space"]} label="Jump" wide />
+          <CtrlRow keys={["ESC"]} label="Release" wide />
         </div>
       </div>
 
-      {/* Controls hint */}
-      <div className="absolute bottom-4 left-4 hud-panel px-4 py-3 anim-blockfall">
-        <div className="pixel-text text-[10px] uppercase opacity-70 mb-1">Controls</div>
-        <div className="pixel-text text-sm leading-snug">
-          <span className="glow-gold">WASD</span> Move &nbsp;
-          <span className="glow-gold">Shift</span> Sprint &nbsp;
-          <span className="glow-gold">Space</span> Jump<br />
-          <span className="glow-gold">Mouse</span> Look &nbsp;
-          <span className="glow-gold">E</span> Interact &nbsp;
-          <span className="glow-gold">Esc</span> Release
-        </div>
-      </div>
-
-      {/* Mini hotbar (decorative) */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1 hud-panel px-2 py-2">
-        {(Object.keys(ZONES) as ZoneId[]).map((z, i) => {
+      {/* Hotbar */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 p-1.5" style={panelStyle}>
+        {zoneIds.map((z, i) => {
           const active = z === currentZone;
+          const c = slotColors[i] ?? "#fff";
           return (
             <div
               key={z}
-              className="w-12 h-12 border-2 flex items-center justify-center pixel-text text-xs"
+              className="w-14 h-14 flex items-center justify-center pixel-text text-2xl rounded-[10px] transition"
               style={{
-                background: active ? ZONES[z].color : "rgba(0,0,0,0.4)",
-                borderColor: active ? "#fff" : "rgba(255,255,255,0.3)",
-                color: active ? "#1a1a1a" : ZONES[z].color,
-                boxShadow: active ? `0 0 14px ${ZONES[z].color}` : "none",
+                background: active ? "rgba(246,196,83,0.15)" : "rgba(0,0,0,0.45)",
+                border: active ? "2px solid #f6c453" : "1.5px solid rgba(255,255,255,0.08)",
+                color: c,
+                boxShadow: active
+                  ? "inset 0 0 12px rgba(246,196,83,0.35), 0 0 14px rgba(246,196,83,0.45)"
+                  : "inset 0 1px 0 rgba(255,255,255,0.05)",
+                textShadow: `0 0 8px ${c}`,
               }}
               title={ZONES[z].name}
             >
