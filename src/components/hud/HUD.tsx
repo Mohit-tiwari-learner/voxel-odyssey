@@ -348,3 +348,62 @@ function FakeMenuButton({ label, icon }: { label: string; icon?: React.ReactNode
     </button>
   );
 }
+
+function DiamondIcon({ color }: { color: string }) {
+  return (
+    <div
+      className="w-10 h-10 flex items-center justify-center flex-shrink-0"
+      style={{
+        background: "rgba(0,0,0,0.45)",
+        border: "1.5px solid rgba(246,196,83,0.6)",
+        borderRadius: "10px",
+      }}
+    >
+      <div
+        className="w-4 h-4"
+        style={{
+          background: color,
+          transform: "rotate(45deg)",
+          boxShadow: `0 0 10px ${color}, inset 0 0 4px rgba(255,255,255,0.5)`,
+          borderRadius: 2,
+        }}
+      />
+    </div>
+  );
+}
+
+function KeyCap({ children, wide }: { children: React.ReactNode; wide?: boolean }) {
+  return (
+    <div
+      className="pixel-text flex items-center justify-center"
+      style={{
+        minWidth: wide ? 44 : 26,
+        height: 26,
+        padding: "0 6px",
+        background: "rgba(0,0,0,0.55)",
+        border: "1.5px solid rgba(246,196,83,0.55)",
+        borderRadius: 6,
+        color: "#f6c453",
+        fontSize: 13,
+        lineHeight: 1,
+        textShadow: "0 0 6px rgba(246,196,83,0.5)",
+        boxShadow: "inset 0 -2px 0 rgba(0,0,0,0.4)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function CtrlRow({ keys, label, wide }: { keys: React.ReactNode[]; label: string; wide?: boolean }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex gap-1">
+        {keys.map((k, i) => (
+          <KeyCap key={i} wide={wide}>{k}</KeyCap>
+        ))}
+      </div>
+      <span className="pixel-text text-sm text-white/85">{label}</span>
+    </div>
+  );
+}
