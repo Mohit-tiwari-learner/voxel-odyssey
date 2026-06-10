@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { useGame, ZONES, type ZoneId } from "@/store/game";
-import heroBg from "@/assets/hero-minecraft.jpg";
+import heroAsset from "@/assets/blockfolio-hero.png.asset.json";
+import { Settings, User, Newspaper, Globe, BookOpen, Brush, MessageSquare, Play, DoorOpen } from "lucide-react";
+
+const heroBg = heroAsset.url;
 
 const ZONE_CONTENT: Record<Exclude<ZoneId, "spawn">, { title: string; body: string }> = {
   village: {
