@@ -580,7 +580,7 @@ function FakeMenuButton({ label, icon, onClick }: { label: string; icon?: React.
 function DiamondIcon({ color }: { color: string }) {
   return (
     <div
-      className="w-10 h-10 flex items-center justify-center flex-shrink-0"
+      className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center flex-shrink-0"
       style={{
         background: "rgba(0,0,0,0.45)",
         border: "1.5px solid rgba(246,196,83,0.6)",
