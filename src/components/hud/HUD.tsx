@@ -67,38 +67,38 @@ export default function HUD() {
       </div>
 
       {/* Top — Current Zone */}
-      <div className="absolute top-5 left-1/2 -translate-x-1/2 anim-blockfall flex items-center gap-3 px-4 py-2.5" style={{ ...panelStyle, minWidth: 300 }}>
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 anim-blockfall flex items-center gap-2 px-3 py-1.5 sm:gap-3 sm:px-4 sm:py-2 sm:top-5 max-w-[60vw]" style={panelStyle}>
         <DiamondIcon color={zone.color} />
-        <div>
-          <div className="pixel-text text-[11px] tracking-[0.22em] text-white/55">CURRENT ZONE</div>
-          <div className="pixel-text text-2xl leading-tight" style={{ color: "#f6c453", textShadow: "0 0 12px rgba(246,196,83,0.5)" }}>
+        <div className="min-w-0">
+          <div className="pixel-text text-[9px] sm:text-[11px] tracking-[0.22em] text-white/55">CURRENT ZONE</div>
+          <div className="pixel-text text-base sm:text-xl leading-tight truncate" style={{ color: "#f6c453", textShadow: "0 0 12px rgba(246,196,83,0.5)" }}>
             {zone.name}
           </div>
         </div>
       </div>
 
       {/* Quest tracker */}
-      <div className="absolute top-5 right-5 anim-blockfall px-4 py-3 max-w-[320px]" style={panelStyle}>
-        <div className="pixel-text text-[11px] tracking-[0.22em] text-white/55 mb-1">▸ QUEST</div>
-        <div className="pixel-text text-xl leading-tight" style={{ color: "#f6c453", textShadow: "0 0 10px rgba(246,196,83,0.45)" }}>
+      <div className="absolute top-3 right-3 anim-blockfall px-3 py-2 max-w-[40vw] sm:max-w-[280px] sm:px-4 sm:py-2.5 sm:top-5 sm:right-5" style={panelStyle}>
+        <div className="pixel-text text-[9px] sm:text-[11px] tracking-[0.22em] text-white/55 mb-1">▸ QUEST</div>
+        <div className="pixel-text text-sm sm:text-base leading-tight" style={{ color: "#f6c453", textShadow: "0 0 10px rgba(246,196,83,0.45)" }}>
           {zone.hint}
         </div>
-        <div className="mt-3 h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <div className="mt-2 h-1 sm:h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
           <div className="h-full rounded-full" style={{
             width: `${Math.max(6, (visited / 6) * 100)}%`,
             background: "linear-gradient(90deg,#f6c453,#ffb22c)",
             boxShadow: "0 0 8px rgba(246,196,83,0.7)",
           }} />
         </div>
-        <div className="pixel-text text-[11px] mt-1.5 text-white/55">Visited {visited}/6 zones</div>
+        <div className="pixel-text text-[9px] sm:text-[11px] mt-1 text-white/55">Visited {visited}/6 zones</div>
       </div>
 
-      {/* Controls */}
-      <div className="absolute bottom-5 left-5 anim-blockfall px-4 py-3" style={panelStyle}>
+      {/* Controls — hidden on mobile */}
+      <div className="hidden md:block absolute bottom-5 left-5 anim-blockfall px-4 py-2.5" style={panelStyle}>
         <div className="pixel-text text-[11px] tracking-[0.22em] text-white/55 mb-2 flex items-center gap-1.5">
           CONTROLS <Gamepad2 className="w-3.5 h-3.5" />
         </div>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-1.5">
           <CtrlRow keys={["W","A","S","D"]} label="Move" />
           <CtrlRow keys={[<Mouse key="m" className="w-4 h-4" />]} label="Look" />
           <CtrlRow keys={["Shift"]} label="Sprint" wide />
@@ -109,14 +109,14 @@ export default function HUD() {
       </div>
 
       {/* Hotbar */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 p-1.5" style={panelStyle}>
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 p-1 sm:gap-1.5 sm:p-1.5 sm:bottom-5" style={panelStyle}>
         {zoneIds.map((z, i) => {
           const active = z === currentZone;
           const c = slotColors[i] ?? "#fff";
           return (
             <div
               key={z}
-              className="w-14 h-14 flex items-center justify-center pixel-text text-2xl rounded-[10px] transition"
+              className="w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center pixel-text text-lg sm:text-xl rounded-[8px] sm:rounded-[10px] transition"
               style={{
                 background: active ? "rgba(246,196,83,0.15)" : "rgba(0,0,0,0.45)",
                 border: active ? "2px solid #f6c453" : "1.5px solid rgba(255,255,255,0.08)",
