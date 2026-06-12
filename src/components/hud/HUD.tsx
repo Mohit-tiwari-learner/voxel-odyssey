@@ -67,38 +67,38 @@ export default function HUD() {
       </div>
 
       {/* Top — Current Zone */}
-      <div className="absolute top-5 left-1/2 -translate-x-1/2 anim-blockfall flex items-center gap-3 px-4 py-2.5" style={{ ...panelStyle, minWidth: 300 }}>
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 anim-blockfall flex items-center gap-2 px-3 py-1.5 sm:gap-3 sm:px-4 sm:py-2 sm:top-5 max-w-[60vw]" style={panelStyle}>
         <DiamondIcon color={zone.color} />
-        <div>
-          <div className="pixel-text text-[11px] tracking-[0.22em] text-white/55">CURRENT ZONE</div>
-          <div className="pixel-text text-2xl leading-tight" style={{ color: "#f6c453", textShadow: "0 0 12px rgba(246,196,83,0.5)" }}>
+        <div className="min-w-0">
+          <div className="pixel-text text-[9px] sm:text-[11px] tracking-[0.22em] text-white/55">CURRENT ZONE</div>
+          <div className="pixel-text text-base sm:text-xl leading-tight truncate" style={{ color: "#f6c453", textShadow: "0 0 12px rgba(246,196,83,0.5)" }}>
             {zone.name}
           </div>
         </div>
       </div>
 
       {/* Quest tracker */}
-      <div className="absolute top-5 right-5 anim-blockfall px-4 py-3 max-w-[320px]" style={panelStyle}>
-        <div className="pixel-text text-[11px] tracking-[0.22em] text-white/55 mb-1">▸ QUEST</div>
-        <div className="pixel-text text-xl leading-tight" style={{ color: "#f6c453", textShadow: "0 0 10px rgba(246,196,83,0.45)" }}>
+      <div className="absolute top-3 right-3 anim-blockfall px-3 py-2 max-w-[40vw] sm:max-w-[280px] sm:px-4 sm:py-2.5 sm:top-5 sm:right-5" style={panelStyle}>
+        <div className="pixel-text text-[9px] sm:text-[11px] tracking-[0.22em] text-white/55 mb-1">▸ QUEST</div>
+        <div className="pixel-text text-sm sm:text-base leading-tight" style={{ color: "#f6c453", textShadow: "0 0 10px rgba(246,196,83,0.45)" }}>
           {zone.hint}
         </div>
-        <div className="mt-3 h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+        <div className="mt-2 h-1 sm:h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
           <div className="h-full rounded-full" style={{
             width: `${Math.max(6, (visited / 6) * 100)}%`,
             background: "linear-gradient(90deg,#f6c453,#ffb22c)",
             boxShadow: "0 0 8px rgba(246,196,83,0.7)",
           }} />
         </div>
-        <div className="pixel-text text-[11px] mt-1.5 text-white/55">Visited {visited}/6 zones</div>
+        <div className="pixel-text text-[9px] sm:text-[11px] mt-1 text-white/55">Visited {visited}/6 zones</div>
       </div>
 
-      {/* Controls */}
-      <div className="absolute bottom-5 left-5 anim-blockfall px-4 py-3" style={panelStyle}>
+      {/* Controls — hidden on mobile */}
+      <div className="hidden md:block absolute bottom-5 left-5 anim-blockfall px-4 py-2.5" style={panelStyle}>
         <div className="pixel-text text-[11px] tracking-[0.22em] text-white/55 mb-2 flex items-center gap-1.5">
           CONTROLS <Gamepad2 className="w-3.5 h-3.5" />
         </div>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-1.5">
           <CtrlRow keys={["W","A","S","D"]} label="Move" />
           <CtrlRow keys={[<Mouse key="m" className="w-4 h-4" />]} label="Look" />
           <CtrlRow keys={["Shift"]} label="Sprint" wide />
@@ -109,14 +109,14 @@ export default function HUD() {
       </div>
 
       {/* Hotbar */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5 p-1.5" style={panelStyle}>
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 p-1 sm:gap-1.5 sm:p-1.5 sm:bottom-5" style={panelStyle}>
         {zoneIds.map((z, i) => {
           const active = z === currentZone;
           const c = slotColors[i] ?? "#fff";
           return (
             <div
               key={z}
-              className="w-14 h-14 flex items-center justify-center pixel-text text-2xl rounded-[10px] transition"
+              className="w-9 h-9 sm:w-12 sm:h-12 flex items-center justify-center pixel-text text-lg sm:text-xl rounded-[8px] sm:rounded-[10px] transition"
               style={{
                 background: active ? "rgba(246,196,83,0.15)" : "rgba(0,0,0,0.45)",
                 border: active ? "2px solid #f6c453" : "1.5px solid rgba(255,255,255,0.08)",
@@ -241,40 +241,40 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
       {/* Top-left: News tile */}
       <button
         onClick={() => setPanel("news")}
-        className="absolute top-4 left-4 w-16 h-20 flex flex-col items-center justify-center gap-1 hover:scale-105 transition cursor-pointer"
+        className="absolute top-3 left-3 sm:top-4 sm:left-4 w-12 h-14 sm:w-14 sm:h-16 flex flex-col items-center justify-center gap-0.5 hover:scale-105 transition cursor-pointer"
         style={{
           background: "linear-gradient(180deg,#3a4f5e 0%,#243340 100%)",
           border: "2px solid rgba(0,0,0,0.6)",
           boxShadow: "inset 0 2px 0 rgba(255,255,255,0.18), 0 4px 0 rgba(0,0,0,0.5)",
         }}
       >
-        <Newspaper className="w-7 h-7 text-emerald-300" />
-        <span className="pixel-text text-[11px]" style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.8)" }}>News</span>
+        <Newspaper className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-300" />
+        <span className="pixel-text text-[10px]" style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.8)" }}>News</span>
       </button>
 
       {/* Top-right: Settings + Profile */}
-      <div className="absolute top-4 right-4 flex gap-2">
-        <IconChip onClick={() => setPanel("settings")} title="Settings"><Settings className="w-6 h-6" /></IconChip>
-        <IconChip onClick={() => setPanel("profile")} title="Profile"><User className="w-6 h-6" /></IconChip>
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex gap-2">
+        <IconChip onClick={() => setPanel("settings")} title="Settings"><Settings className="w-5 h-5" /></IconChip>
+        <IconChip onClick={() => setPanel("profile")} title="Profile"><User className="w-5 h-5" /></IconChip>
       </div>
 
       {/* Bottom-right: TIP panel */}
       <div
-        className="absolute bottom-20 right-4 max-w-[260px] px-4 py-3 flex items-start gap-3"
+        className="hidden sm:flex absolute bottom-24 right-4 max-w-[220px] px-3 py-2 items-start gap-2"
         style={{
           background: "rgba(20,30,25,0.7)",
           border: "2px solid rgba(120,200,120,0.35)",
           boxShadow: "inset 0 2px 0 rgba(255,255,255,0.08), 0 4px 0 rgba(0,0,0,0.4)",
         }}
       >
-        <div className="flex-1">
-          <div className="pixel-text text-base text-emerald-300" style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.8)" }}>TIP</div>
-          <div className="pixel-text text-xs leading-snug opacity-90">
+        <div className="flex-1 min-w-0">
+          <div className="pixel-text text-sm text-emerald-300" style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.8)" }}>TIP</div>
+          <div className="pixel-text text-[11px] leading-snug opacity-90">
             Explore, create, and showcase your voxel imagination.
           </div>
         </div>
         <div
-          className="w-9 h-9 flex-shrink-0"
+          className="w-7 h-7 flex-shrink-0"
           style={{
             background: "linear-gradient(180deg,#4caf50 0%,#2e7d32 100%)",
             border: "2px solid #1b3a1b",
@@ -286,33 +286,33 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
       </div>
 
       {/* Bottom-center stack */}
-      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[560px] px-4 flex flex-col items-stretch gap-3">
+      <div className="absolute bottom-10 sm:bottom-14 left-1/2 -translate-x-1/2 w-full max-w-[420px] px-4 flex flex-col items-stretch gap-2.5">
         <button
           disabled={!loaded}
           onClick={onStart}
-          className="pixel-text text-2xl py-3 flex items-center justify-center gap-3 transition active:translate-y-[3px] disabled:opacity-60 disabled:cursor-wait"
+          className="pixel-text text-lg sm:text-xl py-2.5 flex items-center justify-center gap-2 transition active:translate-y-[3px] disabled:opacity-60 disabled:cursor-wait"
           style={{
             color: "#ffffff",
             background: "linear-gradient(180deg,#8bc24a 0%,#6aa838 45%,#4d8a26 100%)",
             border: "3px solid #1f3b10",
-            boxShadow: "inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.35), 0 6px 0 #1a2a0a, 0 10px 24px rgba(0,0,0,0.5)",
+            boxShadow: "inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.35), 0 5px 0 #1a2a0a, 0 8px 20px rgba(0,0,0,0.5)",
             textShadow: "2px 2px 0 rgba(0,0,0,0.7)",
           }}
         >
-          <Play className="w-6 h-6 fill-white" />
-          {loaded ? "ENTER WORLD" : "GENERATING TERRAIN…"}
+          <Play className="w-5 h-5 fill-white" />
+          {loaded ? "ENTER WORLD" : "GENERATING…"}
         </button>
 
-        <div className="grid grid-cols-2 gap-3">
-          <FakeMenuButton label="OPTIONS..." icon={<Settings className="w-5 h-5" />} onClick={() => setPanel("options")} />
-          <FakeMenuButton label="QUIT" icon={<DoorOpen className="w-5 h-5" />} onClick={handleQuit} />
+        <div className="grid grid-cols-2 gap-2.5">
+          <FakeMenuButton label="OPTIONS" icon={<Settings className="w-4 h-4" />} onClick={() => setPanel("options")} />
+          <FakeMenuButton label="QUIT" icon={<DoorOpen className="w-4 h-4" />} onClick={handleQuit} />
         </div>
 
-        <div className="mt-1 flex items-center justify-center gap-2">
-          <SmallIcon onClick={() => setPanel("website")} title="Website"><Globe className="w-5 h-5" /></SmallIcon>
-          <SmallIcon onClick={() => setPanel("guide")} title="Guide"><BookOpen className="w-5 h-5" /></SmallIcon>
-          <SmallIcon onClick={() => setPanel("skins")} title="Skins"><Brush className="w-5 h-5" /></SmallIcon>
-          <SmallIcon onClick={() => setPanel("feedback")} title="Feedback"><MessageSquare className="w-5 h-5" /></SmallIcon>
+        <div className="mt-0.5 flex items-center justify-center gap-2">
+          <SmallIcon onClick={() => setPanel("website")} title="Website"><Globe className="w-4 h-4" /></SmallIcon>
+          <SmallIcon onClick={() => setPanel("guide")} title="Guide"><BookOpen className="w-4 h-4" /></SmallIcon>
+          <SmallIcon onClick={() => setPanel("skins")} title="Skins"><Brush className="w-4 h-4" /></SmallIcon>
+          <SmallIcon onClick={() => setPanel("feedback")} title="Feedback"><MessageSquare className="w-4 h-4" /></SmallIcon>
         </div>
       </div>
 
@@ -529,7 +529,7 @@ function IconChip({ children, onClick, title }: { children: React.ReactNode; onC
     <button
       onClick={onClick}
       title={title}
-      className="w-12 h-12 flex items-center justify-center text-white/90 hover:scale-105 active:translate-y-[2px] transition"
+      className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-white/90 hover:scale-105 active:translate-y-[2px] transition"
       style={{
         background: "linear-gradient(180deg,#3a4f5e 0%,#243340 100%)",
         border: "2px solid rgba(0,0,0,0.6)",
@@ -546,7 +546,7 @@ function SmallIcon({ children, onClick, title }: { children: React.ReactNode; on
     <button
       onClick={onClick}
       title={title}
-      className="w-11 h-11 flex items-center justify-center text-white/85 hover:text-white active:translate-y-[2px] transition"
+      className="w-9 h-9 flex items-center justify-center text-white/85 hover:text-white active:translate-y-[2px] transition"
       style={{
         background: "linear-gradient(180deg,#2d3d4a 0%,#1a262f 100%)",
         border: "2px solid rgba(0,0,0,0.6)",
@@ -562,12 +562,12 @@ function FakeMenuButton({ label, icon, onClick }: { label: string; icon?: React.
   return (
     <button
       onClick={onClick}
-      className="pixel-text text-lg py-2 flex items-center justify-center gap-2 opacity-95 hover:brightness-110 transition active:translate-y-[2px]"
+      className="pixel-text text-sm sm:text-base py-1.5 flex items-center justify-center gap-2 opacity-95 hover:brightness-110 transition active:translate-y-[2px]"
       style={{
         color: "#ffffff",
         background: "linear-gradient(180deg,#9a9a9a 0%,#7a7a7a 50%,#5a5a5a 100%)",
-        border: "3px solid #2a2a2a",
-        boxShadow: "inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.4), 0 4px 0 #1a1a1a",
+        border: "2px solid #2a2a2a",
+        boxShadow: "inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.4), 0 3px 0 #1a1a1a",
         textShadow: "2px 2px 0 rgba(0,0,0,0.7)",
       }}
     >
@@ -580,7 +580,7 @@ function FakeMenuButton({ label, icon, onClick }: { label: string; icon?: React.
 function DiamondIcon({ color }: { color: string }) {
   return (
     <div
-      className="w-10 h-10 flex items-center justify-center flex-shrink-0"
+      className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center flex-shrink-0"
       style={{
         background: "rgba(0,0,0,0.45)",
         border: "1.5px solid rgba(246,196,83,0.6)",
