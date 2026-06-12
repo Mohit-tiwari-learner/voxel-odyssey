@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useGame, ZONES, type ZoneId } from "@/store/game";
-import heroAsset from "@/assets/blockfolio-hero.png.asset.json";
+import heroAsset from "@/assets/blockfolio-hero-v2.png.asset.json";
 import { Settings, User, Newspaper, Globe, BookOpen, Brush, MessageSquare, Play, DoorOpen, Gamepad2, Mouse } from "lucide-react";
 
 const heroBg = heroAsset.url;
