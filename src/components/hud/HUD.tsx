@@ -529,7 +529,7 @@ function IconChip({ children, onClick, title }: { children: React.ReactNode; onC
     <button
       onClick={onClick}
       title={title}
-      className="w-12 h-12 flex items-center justify-center text-white/90 hover:scale-105 active:translate-y-[2px] transition"
+      className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-white/90 hover:scale-105 active:translate-y-[2px] transition"
       style={{
         background: "linear-gradient(180deg,#3a4f5e 0%,#243340 100%)",
         border: "2px solid rgba(0,0,0,0.6)",
@@ -546,7 +546,7 @@ function SmallIcon({ children, onClick, title }: { children: React.ReactNode; on
     <button
       onClick={onClick}
       title={title}
-      className="w-11 h-11 flex items-center justify-center text-white/85 hover:text-white active:translate-y-[2px] transition"
+      className="w-9 h-9 flex items-center justify-center text-white/85 hover:text-white active:translate-y-[2px] transition"
       style={{
         background: "linear-gradient(180deg,#2d3d4a 0%,#1a262f 100%)",
         border: "2px solid rgba(0,0,0,0.6)",
@@ -562,12 +562,12 @@ function FakeMenuButton({ label, icon, onClick }: { label: string; icon?: React.
   return (
     <button
       onClick={onClick}
-      className="pixel-text text-lg py-2 flex items-center justify-center gap-2 opacity-95 hover:brightness-110 transition active:translate-y-[2px]"
+      className="pixel-text text-sm sm:text-base py-1.5 flex items-center justify-center gap-2 opacity-95 hover:brightness-110 transition active:translate-y-[2px]"
       style={{
         color: "#ffffff",
         background: "linear-gradient(180deg,#9a9a9a 0%,#7a7a7a 50%,#5a5a5a 100%)",
-        border: "3px solid #2a2a2a",
-        boxShadow: "inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.4), 0 4px 0 #1a1a1a",
+        border: "2px solid #2a2a2a",
+        boxShadow: "inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.4), 0 3px 0 #1a1a1a",
         textShadow: "2px 2px 0 rgba(0,0,0,0.7)",
       }}
     >
