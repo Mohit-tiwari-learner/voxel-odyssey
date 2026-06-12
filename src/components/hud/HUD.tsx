@@ -241,40 +241,40 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
       {/* Top-left: News tile */}
       <button
         onClick={() => setPanel("news")}
-        className="absolute top-4 left-4 w-16 h-20 flex flex-col items-center justify-center gap-1 hover:scale-105 transition cursor-pointer"
+        className="absolute top-3 left-3 sm:top-4 sm:left-4 w-12 h-14 sm:w-14 sm:h-16 flex flex-col items-center justify-center gap-0.5 hover:scale-105 transition cursor-pointer"
         style={{
           background: "linear-gradient(180deg,#3a4f5e 0%,#243340 100%)",
           border: "2px solid rgba(0,0,0,0.6)",
           boxShadow: "inset 0 2px 0 rgba(255,255,255,0.18), 0 4px 0 rgba(0,0,0,0.5)",
         }}
       >
-        <Newspaper className="w-7 h-7 text-emerald-300" />
-        <span className="pixel-text text-[11px]" style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.8)" }}>News</span>
+        <Newspaper className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-300" />
+        <span className="pixel-text text-[10px]" style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.8)" }}>News</span>
       </button>
 
       {/* Top-right: Settings + Profile */}
-      <div className="absolute top-4 right-4 flex gap-2">
-        <IconChip onClick={() => setPanel("settings")} title="Settings"><Settings className="w-6 h-6" /></IconChip>
-        <IconChip onClick={() => setPanel("profile")} title="Profile"><User className="w-6 h-6" /></IconChip>
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex gap-2">
+        <IconChip onClick={() => setPanel("settings")} title="Settings"><Settings className="w-5 h-5" /></IconChip>
+        <IconChip onClick={() => setPanel("profile")} title="Profile"><User className="w-5 h-5" /></IconChip>
       </div>
 
       {/* Bottom-right: TIP panel */}
       <div
-        className="absolute bottom-20 right-4 max-w-[260px] px-4 py-3 flex items-start gap-3"
+        className="hidden sm:flex absolute bottom-24 right-4 max-w-[220px] px-3 py-2 items-start gap-2"
         style={{
           background: "rgba(20,30,25,0.7)",
           border: "2px solid rgba(120,200,120,0.35)",
           boxShadow: "inset 0 2px 0 rgba(255,255,255,0.08), 0 4px 0 rgba(0,0,0,0.4)",
         }}
       >
-        <div className="flex-1">
-          <div className="pixel-text text-base text-emerald-300" style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.8)" }}>TIP</div>
-          <div className="pixel-text text-xs leading-snug opacity-90">
+        <div className="flex-1 min-w-0">
+          <div className="pixel-text text-sm text-emerald-300" style={{ textShadow: "1px 1px 0 rgba(0,0,0,0.8)" }}>TIP</div>
+          <div className="pixel-text text-[11px] leading-snug opacity-90">
             Explore, create, and showcase your voxel imagination.
           </div>
         </div>
         <div
-          className="w-9 h-9 flex-shrink-0"
+          className="w-7 h-7 flex-shrink-0"
           style={{
             background: "linear-gradient(180deg,#4caf50 0%,#2e7d32 100%)",
             border: "2px solid #1b3a1b",
@@ -286,33 +286,33 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
       </div>
 
       {/* Bottom-center stack */}
-      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[560px] px-4 flex flex-col items-stretch gap-3">
+      <div className="absolute bottom-10 sm:bottom-14 left-1/2 -translate-x-1/2 w-full max-w-[420px] px-4 flex flex-col items-stretch gap-2.5">
         <button
           disabled={!loaded}
           onClick={onStart}
-          className="pixel-text text-2xl py-3 flex items-center justify-center gap-3 transition active:translate-y-[3px] disabled:opacity-60 disabled:cursor-wait"
+          className="pixel-text text-lg sm:text-xl py-2.5 flex items-center justify-center gap-2 transition active:translate-y-[3px] disabled:opacity-60 disabled:cursor-wait"
           style={{
             color: "#ffffff",
             background: "linear-gradient(180deg,#8bc24a 0%,#6aa838 45%,#4d8a26 100%)",
             border: "3px solid #1f3b10",
-            boxShadow: "inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.35), 0 6px 0 #1a2a0a, 0 10px 24px rgba(0,0,0,0.5)",
+            boxShadow: "inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.35), 0 5px 0 #1a2a0a, 0 8px 20px rgba(0,0,0,0.5)",
             textShadow: "2px 2px 0 rgba(0,0,0,0.7)",
           }}
         >
-          <Play className="w-6 h-6 fill-white" />
-          {loaded ? "ENTER WORLD" : "GENERATING TERRAIN…"}
+          <Play className="w-5 h-5 fill-white" />
+          {loaded ? "ENTER WORLD" : "GENERATING…"}
         </button>
 
-        <div className="grid grid-cols-2 gap-3">
-          <FakeMenuButton label="OPTIONS..." icon={<Settings className="w-5 h-5" />} onClick={() => setPanel("options")} />
-          <FakeMenuButton label="QUIT" icon={<DoorOpen className="w-5 h-5" />} onClick={handleQuit} />
+        <div className="grid grid-cols-2 gap-2.5">
+          <FakeMenuButton label="OPTIONS" icon={<Settings className="w-4 h-4" />} onClick={() => setPanel("options")} />
+          <FakeMenuButton label="QUIT" icon={<DoorOpen className="w-4 h-4" />} onClick={handleQuit} />
         </div>
 
-        <div className="mt-1 flex items-center justify-center gap-2">
-          <SmallIcon onClick={() => setPanel("website")} title="Website"><Globe className="w-5 h-5" /></SmallIcon>
-          <SmallIcon onClick={() => setPanel("guide")} title="Guide"><BookOpen className="w-5 h-5" /></SmallIcon>
-          <SmallIcon onClick={() => setPanel("skins")} title="Skins"><Brush className="w-5 h-5" /></SmallIcon>
-          <SmallIcon onClick={() => setPanel("feedback")} title="Feedback"><MessageSquare className="w-5 h-5" /></SmallIcon>
+        <div className="mt-0.5 flex items-center justify-center gap-2">
+          <SmallIcon onClick={() => setPanel("website")} title="Website"><Globe className="w-4 h-4" /></SmallIcon>
+          <SmallIcon onClick={() => setPanel("guide")} title="Guide"><BookOpen className="w-4 h-4" /></SmallIcon>
+          <SmallIcon onClick={() => setPanel("skins")} title="Skins"><Brush className="w-4 h-4" /></SmallIcon>
+          <SmallIcon onClick={() => setPanel("feedback")} title="Feedback"><MessageSquare className="w-4 h-4" /></SmallIcon>
         </div>
       </div>
 
