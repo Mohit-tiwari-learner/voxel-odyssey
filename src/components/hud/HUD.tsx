@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useGame, ZONES, type ZoneId } from "@/store/game";
 import heroAsset from "@/assets/blockfolio-hero-v2.png.asset.json";
-import { Settings, User, Newspaper, Globe, BookOpen, Brush, MessageSquare, Play, DoorOpen, Gamepad2, Mouse } from "lucide-react";
+import { Settings, User, Newspaper, Globe, BookOpen, Brush, MessageSquare, Play, DoorOpen, Gamepad2, Mouse, X, Volume2, Eye, Github, Twitter, Mail } from "lucide-react";
 
 const heroBg = heroAsset.url;
 
@@ -189,10 +189,48 @@ export default function HUD() {
   );
 }
 
+type PanelKey =
+  | "news"
+  | "settings"
+  | "profile"
+  | "options"
+  | "quit"
+  | "website"
+  | "guide"
+  | "skins"
+  | "feedback"
+  | null;
+
 function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boolean }) {
+  const [panel, setPanel] = useState<PanelKey>(null);
+  const [muted, setMuted] = useState(false);
+  const [fov, setFov] = useState(75);
+  const [quality, setQuality] = useState<"low" | "medium" | "high">("high");
+  const [quitConfirm, setQuitConfirm] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code === "Escape") setPanel(null);
+      if (e.code === "Enter" && loaded && !panel) onStart();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [loaded, panel, onStart]);
+
+  const handleQuit = () => {
+    setQuitConfirm(true);
+    setPanel("quit");
+  };
+  const reallyQuit = () => {
+    // Best-effort: try window.close (works if opened via script), else navigate away
+    window.close();
+    setTimeout(() => {
+      window.location.href = "about:blank";
+    }, 100);
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-hidden text-white">
-      {/* Full-bleed hero image (BLOCKFOLIO logo + scene baked in) */}
       <img
         src={heroBg}
         alt="Blockfolio — A Voxel Portfolio Experience"
@@ -202,6 +240,7 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
 
       {/* Top-left: News tile */}
       <button
+        onClick={() => setPanel("news")}
         className="absolute top-4 left-4 w-16 h-20 flex flex-col items-center justify-center gap-1 hover:scale-105 transition cursor-pointer"
         style={{
           background: "linear-gradient(180deg,#3a4f5e 0%,#243340 100%)",
@@ -215,11 +254,11 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
 
       {/* Top-right: Settings + Profile */}
       <div className="absolute top-4 right-4 flex gap-2">
-        <IconChip><Settings className="w-6 h-6" /></IconChip>
-        <IconChip><User className="w-6 h-6" /></IconChip>
+        <IconChip onClick={() => setPanel("settings")} title="Settings"><Settings className="w-6 h-6" /></IconChip>
+        <IconChip onClick={() => setPanel("profile")} title="Profile"><User className="w-6 h-6" /></IconChip>
       </div>
 
-      {/* Bottom-right: TIP panel with creeper */}
+      {/* Bottom-right: TIP panel */}
       <div
         className="absolute bottom-20 right-4 max-w-[260px] px-4 py-3 flex items-start gap-3"
         style={{
@@ -237,8 +276,7 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
         <div
           className="w-9 h-9 flex-shrink-0"
           style={{
-            background:
-              "linear-gradient(180deg,#4caf50 0%,#2e7d32 100%)",
+            background: "linear-gradient(180deg,#4caf50 0%,#2e7d32 100%)",
             border: "2px solid #1b3a1b",
             imageRendering: "pixelated",
             boxShadow: "inset -2px -2px 0 rgba(0,0,0,0.35), inset 2px 2px 0 rgba(255,255,255,0.25)",
@@ -247,20 +285,17 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
         />
       </div>
 
-      {/* Bottom-center: Enter World + Options/Quit + icon bar */}
+      {/* Bottom-center stack */}
       <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[560px] px-4 flex flex-col items-stretch gap-3">
-        {/* Big green Enter World */}
         <button
           disabled={!loaded}
           onClick={onStart}
           className="pixel-text text-2xl py-3 flex items-center justify-center gap-3 transition active:translate-y-[3px] disabled:opacity-60 disabled:cursor-wait"
           style={{
             color: "#ffffff",
-            background:
-              "linear-gradient(180deg,#8bc24a 0%,#6aa838 45%,#4d8a26 100%)",
+            background: "linear-gradient(180deg,#8bc24a 0%,#6aa838 45%,#4d8a26 100%)",
             border: "3px solid #1f3b10",
-            boxShadow:
-              "inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.35), 0 6px 0 #1a2a0a, 0 10px 24px rgba(0,0,0,0.5)",
+            boxShadow: "inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.35), 0 6px 0 #1a2a0a, 0 10px 24px rgba(0,0,0,0.5)",
             textShadow: "2px 2px 0 rgba(0,0,0,0.7)",
           }}
         >
@@ -269,20 +304,18 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
         </button>
 
         <div className="grid grid-cols-2 gap-3">
-          <FakeMenuButton label="OPTIONS..." icon={<Settings className="w-5 h-5" />} />
-          <FakeMenuButton label="QUIT" icon={<DoorOpen className="w-5 h-5" />} />
+          <FakeMenuButton label="OPTIONS..." icon={<Settings className="w-5 h-5" />} onClick={() => setPanel("options")} />
+          <FakeMenuButton label="QUIT" icon={<DoorOpen className="w-5 h-5" />} onClick={handleQuit} />
         </div>
 
-        {/* Small icon row */}
         <div className="mt-1 flex items-center justify-center gap-2">
-          <SmallIcon><Globe className="w-5 h-5" /></SmallIcon>
-          <SmallIcon><BookOpen className="w-5 h-5" /></SmallIcon>
-          <SmallIcon><Brush className="w-5 h-5" /></SmallIcon>
-          <SmallIcon><MessageSquare className="w-5 h-5" /></SmallIcon>
+          <SmallIcon onClick={() => setPanel("website")} title="Website"><Globe className="w-5 h-5" /></SmallIcon>
+          <SmallIcon onClick={() => setPanel("guide")} title="Guide"><BookOpen className="w-5 h-5" /></SmallIcon>
+          <SmallIcon onClick={() => setPanel("skins")} title="Skins"><Brush className="w-5 h-5" /></SmallIcon>
+          <SmallIcon onClick={() => setPanel("feedback")} title="Feedback"><MessageSquare className="w-5 h-5" /></SmallIcon>
         </div>
       </div>
 
-      {/* Footers */}
       <div
         className="absolute bottom-3 left-4 pixel-text text-xs leading-tight"
         style={{ color: "#fff", textShadow: "2px 2px 0 rgba(0,0,0,0.85)" }}
@@ -296,14 +329,207 @@ function LoadingScreen({ onStart, loaded }: { onStart: () => void; loaded: boole
       >
         © 2026 Mojang-style ✦ All rights reserved
       </div>
+
+      {/* Modal panel */}
+      {panel && (
+        <Modal onClose={() => { setPanel(null); setQuitConfirm(false); }} title={panelTitle(panel)}>
+          {panel === "news" && (
+            <div className="space-y-3 pixel-text text-sm">
+              <NewsItem date="Jun 12, 2026" title="v1.0 Voxel Edition launched" body="Six explorable zones, smooth day/night cycle, and improved physics." />
+              <NewsItem date="Jun 05, 2026" title="New Projects Biome" body="Living projects now sprout as biomes you can walk through." />
+              <NewsItem date="May 28, 2026" title="Performance update" body="20% faster terrain generation on low-end devices." />
+            </div>
+          )}
+          {panel === "settings" && (
+            <div className="space-y-4 pixel-text text-sm">
+              <Row label="Sound">
+                <button onClick={() => setMuted((m) => !m)} className="hud-panel px-3 py-1 flex items-center gap-2">
+                  <Volume2 className="w-4 h-4" /> {muted ? "Muted" : "On"}
+                </button>
+              </Row>
+              <Row label={`Field of View: ${fov}°`}>
+                <input type="range" min={60} max={110} value={fov} onChange={(e) => setFov(+e.target.value)} className="w-full accent-yellow-400" />
+              </Row>
+              <Row label="Quality">
+                <div className="flex gap-2">
+                  {(["low","medium","high"] as const).map((q) => (
+                    <button key={q} onClick={() => setQuality(q)}
+                      className="hud-panel px-3 py-1"
+                      style={{ background: quality === q ? "rgba(246,196,83,0.25)" : undefined, borderColor: quality === q ? "#f6c453" : undefined }}>
+                      {q.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </Row>
+            </div>
+          )}
+          {panel === "profile" && (
+            <div className="space-y-3 pixel-text text-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14" style={{ background: "linear-gradient(135deg,#f6c453,#fb8500)", border: "2px solid #1f1409" }} />
+                <div>
+                  <div className="text-lg" style={{ color: "#f6c453" }}>Player_01</div>
+                  <div className="opacity-70">Explorer • Level 1</div>
+                </div>
+              </div>
+              <div className="opacity-80">Sign-in coming soon. Your progress is saved locally for now.</div>
+            </div>
+          )}
+          {panel === "options" && (
+            <div className="space-y-3 pixel-text text-sm">
+              <Row label="Show FPS"><Toggle /></Row>
+              <Row label="Invert Mouse"><Toggle /></Row>
+              <Row label="Reduced Motion"><Toggle /></Row>
+              <Row label="View Distance"><Eye className="w-5 h-5 inline mr-1" />Far</Row>
+            </div>
+          )}
+          {panel === "quit" && quitConfirm && (
+            <div className="space-y-4 pixel-text text-sm">
+              <div>Are you sure you want to quit Blockfolio?</div>
+              <div className="flex gap-3">
+                <button onClick={reallyQuit} className="hud-panel px-4 py-2" style={{ borderColor: "#ef4444", color: "#fca5a5" }}>Yes, quit</button>
+                <button onClick={() => { setPanel(null); setQuitConfirm(false); }} className="hud-panel px-4 py-2">Cancel</button>
+              </div>
+            </div>
+          )}
+          {panel === "website" && (
+            <div className="space-y-2 pixel-text text-sm">
+              <a href="https://lovable.dev" target="_blank" rel="noreferrer" className="hud-panel block px-3 py-2 hover:bg-white/10">→ lovable.dev</a>
+              <a href="https://github.com" target="_blank" rel="noreferrer" className="hud-panel block px-3 py-2 hover:bg-white/10 flex items-center gap-2"><Github className="w-4 h-4" /> GitHub</a>
+              <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hud-panel block px-3 py-2 hover:bg-white/10 flex items-center gap-2"><Twitter className="w-4 h-4" /> Twitter</a>
+            </div>
+          )}
+          {panel === "guide" && (
+            <div className="space-y-2 pixel-text text-sm">
+              <p>Welcome to Blockfolio — a voxel portfolio you can walk through.</p>
+              <ul className="list-disc list-inside opacity-90 space-y-1">
+                <li>Use <b>WASD</b> to move, <b>mouse</b> to look</li>
+                <li>Press <b>E</b> near landmarks to interact</li>
+                <li>Visit all six zones to learn about the developer</li>
+                <li>Press <b>Esc</b> anytime to release the cursor</li>
+              </ul>
+            </div>
+          )}
+          {panel === "skins" && (
+            <div className="grid grid-cols-4 gap-3">
+              {["#f6c453","#5ec8f0","#fb8500","#c77dff","#8ecae6","#a663cc","#4caf50","#ef4444"].map((c) => (
+                <button key={c} className="aspect-square hover:scale-105 transition"
+                  style={{ background: c, border: "2px solid #111", boxShadow: "inset -3px -3px 0 rgba(0,0,0,0.35), inset 3px 3px 0 rgba(255,255,255,0.25)" }} />
+              ))}
+            </div>
+          )}
+          {panel === "feedback" && (
+            <FeedbackForm onSent={() => setPanel(null)} />
+          )}
+        </Modal>
+      )}
     </div>
   );
 }
 
-function IconChip({ children }: { children: React.ReactNode }) {
+function panelTitle(p: Exclude<PanelKey, null>) {
+  return {
+    news: "News",
+    settings: "Settings",
+    profile: "Profile",
+    options: "Options",
+    quit: "Quit Game",
+    website: "Links",
+    guide: "Guide",
+    skins: "Skins",
+    feedback: "Feedback",
+  }[p];
+}
+
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="relative w-[92%] max-w-md p-5"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "linear-gradient(180deg,#1a2530 0%,#0e1620 100%)",
+          border: "3px solid #0a0f15",
+          boxShadow: "inset 0 2px 0 rgba(255,255,255,0.12), 0 8px 0 rgba(0,0,0,0.6), 0 12px 30px rgba(0,0,0,0.5)",
+        }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="pixel-text text-xl" style={{ color: "#f6c453", textShadow: "2px 2px 0 rgba(0,0,0,0.7)" }}>{title}</div>
+          <button onClick={onClose} className="text-white/80 hover:text-white" aria-label="Close"><X className="w-5 h-5" /></button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="opacity-90">{label}</span>
+      <div>{children}</div>
+    </div>
+  );
+}
+
+function Toggle() {
+  const [on, setOn] = useState(false);
+  return (
+    <button onClick={() => setOn((o) => !o)}
+      className="w-12 h-6 relative rounded-full transition"
+      style={{ background: on ? "#4d8a26" : "#3a3a3a", border: "2px solid #111" }}>
+      <span className="absolute top-0.5 w-4 h-4 bg-white transition-all" style={{ left: on ? 24 : 2 }} />
+    </button>
+  );
+}
+
+function NewsItem({ date, title, body }: { date: string; title: string; body: string }) {
+  return (
+    <div className="hud-panel p-3">
+      <div className="opacity-60 text-xs">{date}</div>
+      <div style={{ color: "#f6c453" }}>{title}</div>
+      <div className="opacity-85 mt-1">{body}</div>
+    </div>
+  );
+}
+
+function FeedbackForm({ onSent }: { onSent: () => void }) {
+  const [msg, setMsg] = useState("");
+  const [sent, setSent] = useState(false);
+  if (sent) {
+    return <div className="pixel-text text-sm" style={{ color: "#8bc24a" }}>Thanks! Your feedback was recorded locally.</div>;
+  }
+  return (
+    <form
+      className="space-y-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        try { localStorage.setItem("blockfolio_feedback_" + Date.now(), msg); } catch {}
+        setSent(true);
+        setTimeout(onSent, 1200);
+      }}
+    >
+      <textarea
+        value={msg}
+        onChange={(e) => setMsg(e.target.value)}
+        placeholder="Tell us what you think…"
+        className="w-full h-28 p-2 pixel-text text-sm bg-black/40 border-2 border-white/15 outline-none focus:border-yellow-400/60 text-white"
+        required
+      />
+      <div className="flex items-center justify-between">
+        <a href="mailto:hello@portfolio.dev" className="pixel-text text-xs opacity-75 hover:opacity-100 flex items-center gap-1"><Mail className="w-3 h-3" /> email instead</a>
+        <button type="submit" className="hud-panel pixel-text px-4 py-2" style={{ borderColor: "#8bc24a", color: "#bef264" }}>Send</button>
+      </div>
+    </form>
+  );
+}
+
+function IconChip({ children, onClick, title }: { children: React.ReactNode; onClick?: () => void; title?: string }) {
   return (
     <button
-      className="w-12 h-12 flex items-center justify-center text-white/90 hover:scale-105 transition"
+      onClick={onClick}
+      title={title}
+      className="w-12 h-12 flex items-center justify-center text-white/90 hover:scale-105 active:translate-y-[2px] transition"
       style={{
         background: "linear-gradient(180deg,#3a4f5e 0%,#243340 100%)",
         border: "2px solid rgba(0,0,0,0.6)",
@@ -315,10 +541,12 @@ function IconChip({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SmallIcon({ children }: { children: React.ReactNode }) {
+function SmallIcon({ children, onClick, title }: { children: React.ReactNode; onClick?: () => void; title?: string }) {
   return (
     <button
-      className="w-11 h-11 flex items-center justify-center text-white/85 hover:text-white transition"
+      onClick={onClick}
+      title={title}
+      className="w-11 h-11 flex items-center justify-center text-white/85 hover:text-white active:translate-y-[2px] transition"
       style={{
         background: "linear-gradient(180deg,#2d3d4a 0%,#1a262f 100%)",
         border: "2px solid rgba(0,0,0,0.6)",
@@ -330,16 +558,16 @@ function SmallIcon({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FakeMenuButton({ label, icon }: { label: string; icon?: React.ReactNode }) {
+function FakeMenuButton({ label, icon, onClick }: { label: string; icon?: React.ReactNode; onClick?: () => void }) {
   return (
     <button
+      onClick={onClick}
       className="pixel-text text-lg py-2 flex items-center justify-center gap-2 opacity-95 hover:brightness-110 transition active:translate-y-[2px]"
       style={{
         color: "#ffffff",
         background: "linear-gradient(180deg,#9a9a9a 0%,#7a7a7a 50%,#5a5a5a 100%)",
         border: "3px solid #2a2a2a",
-        boxShadow:
-          "inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.4), 0 4px 0 #1a1a1a",
+        boxShadow: "inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.4), 0 4px 0 #1a1a1a",
         textShadow: "2px 2px 0 rgba(0,0,0,0.7)",
       }}
     >
