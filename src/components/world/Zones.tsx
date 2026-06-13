@@ -100,31 +100,170 @@ export function SpawnArea() {
   );
 }
 
-/* VILLAGE — small house */
+/* ABOUT VILLAGE — a small medieval voxel hamlet: cobble path, main cottage,
+ * well, market stall, fenced garden with crops, lanterns and signposts. */
 export function Village() {
   const base = ZONES_LOCAL.village;
+
+  // Palette
+  const OAK = "#b6824a";
+  const OAK_DARK = "#7a4f29";
+  const PLANK = "#caa472";
+  const COBBLE = "#8a8d92";
+  const COBBLE_DARK = "#6b6e72";
+  const ROOF = "#7a2e2e";
+  const ROOF_DARK = "#5a1f1f";
+  const DIRT = "#6b4a2b";
+  const LEAF = "#3f7a3a";
+  const WHEAT = "#e0c060";
+  const WATER = "#5fbfe0";
+  const LAMP = "#ffe6a8";
+
+  const blocks: React.ReactElement[] = [];
+
+  // --- Cobble path winding through the village (z-axis spine) ---
+  for (let z = -10; z <= 10; z++) {
+    const wobble = Math.round(Math.sin(z * 0.4) * 1);
+    for (let dx = -1; dx <= 1; dx++) {
+      const x = wobble + dx;
+      blocks.push(
+        <Block key={`pth-${z}-${dx}`} position={[x, 0, z]} color={(x + z) % 2 === 0 ? COBBLE : COBBLE_DARK} />
+      );
+    }
+  }
+
+  // --- Main cottage (4x5 footprint, pitched roof, door + windows) ---
+  const hx = -5, hz = -2;
+  const W = 5, D = 4, H = 3;
+  // Plank floor
+  for (let x = 0; x < W; x++) {
+    for (let z = 0; z < D; z++) {
+      blocks.push(<Block key={`hf-${x}-${z}`} position={[hx + x, 0, hz + z]} color={PLANK} />);
+    }
+  }
+  // Walls
+  for (let x = 0; x < W; x++) {
+    for (let y = 1; y <= H; y++) {
+      // back wall (far from path)
+      blocks.push(<Block key={`hbw-${x}-${y}`} position={[hx + x, y, hz - 1]} color={x % 2 ? OAK : OAK_DARK} />);
+      // front wall — door at x=2, y=1..2; window at x=0/4, y=2
+      const isDoor = x === 2 && (y === 1 || y === 2);
+      const isWin = (x === 0 || x === 4) && y === 2;
+      if (isDoor) continue;
+      if (isWin) {
+        blocks.push(
+          <mesh key={`hgw-${x}-${y}`} position={[hx + x, y, hz + D]} geometry={SHADED_BOX} castShadow receiveShadow>
+            <meshPhysicalMaterial color="#b8e8ff" transmission={0.85} thickness={0.3} roughness={0.05} transparent opacity={0.6} />
+          </mesh>
+        );
+      } else {
+        blocks.push(<Block key={`hfw-${x}-${y}`} position={[hx + x, y, hz + D]} color={x % 2 ? OAK : OAK_DARK} />);
+      }
+    }
+  }
+  for (let z = 0; z < D; z++) {
+    for (let y = 1; y <= H; y++) {
+      blocks.push(<Block key={`hlw-${z}-${y}`} position={[hx - 1, y, hz + z]} color={z % 2 ? OAK : OAK_DARK} />);
+      blocks.push(<Block key={`hrw-${z}-${y}`} position={[hx + W, y, hz + z]} color={z % 2 ? OAK : OAK_DARK} />);
+    }
+  }
+  // Pitched roof (two slopes)
+  for (let z = -1; z <= D; z++) {
+    const off = Math.min(Math.abs(z - (D - 1) / 2), 2);
+    const ry = H + 1 + (2 - off);
+    for (let x = -1; x <= W; x++) {
+      blocks.push(<Block key={`hr-${x}-${z}`} position={[hx + x, ry, hz + z]} color={off === 0 ? ROOF_DARK : ROOF} />);
+    }
+  }
+  // Door frame
+  blocks.push(<Block key="hd1" position={[hx + 2, 3, hz + D]} color={OAK_DARK} />);
+  // Chimney
+  blocks.push(<Block key="hch1" position={[hx + W - 1, H + 3, hz]} color={COBBLE_DARK} />);
+  blocks.push(<Block key="hch2" position={[hx + W - 1, H + 4, hz]} color={COBBLE_DARK} />);
+  // Lantern by door
+  blocks.push(<Block key="hl1" position={[hx + 1, 3, hz + D]} color={LAMP} emissive={LAMP} size={0.4} />);
+  blocks.push(<Block key="hl2" position={[hx + 3, 3, hz + D]} color={LAMP} emissive={LAMP} size={0.4} />);
+
+  // --- Well (4x4 cobble rim, water inside, two posts + roof) ---
+  const wx = 4, wz = -4;
+  for (let x = -1; x <= 1; x++) {
+    for (let z = -1; z <= 1; z++) {
+      const onRim = Math.max(Math.abs(x), Math.abs(z)) === 1;
+      if (onRim) blocks.push(<Block key={`wr-${x}-${z}`} position={[wx + x, 1, wz + z]} color={COBBLE} />);
+    }
+  }
+  blocks.push(
+    <mesh key="ww" position={[wx, 1, wz]} geometry={SHADED_BOX} receiveShadow>
+      <meshStandardMaterial color={WATER} transparent opacity={0.85} roughness={0.2} />
+    </mesh>
+  );
+  blocks.push(<Block key="wp1" position={[wx - 1, 2, wz - 1]} color={OAK_DARK} size={0.3} />);
+  blocks.push(<Block key="wp1b" position={[wx - 1, 3, wz - 1]} color={OAK_DARK} size={0.3} />);
+  blocks.push(<Block key="wp2" position={[wx + 1, 2, wz + 1]} color={OAK_DARK} size={0.3} />);
+  blocks.push(<Block key="wp2b" position={[wx + 1, 3, wz + 1]} color={OAK_DARK} size={0.3} />);
+  for (let x = -1; x <= 1; x++) for (let z = -1; z <= 1; z++)
+    blocks.push(<Block key={`wrf-${x}-${z}`} position={[wx + x, 4, wz + z]} color={ROOF} />);
+
+  // --- Market stall (open-front, plank counter + striped awning) ---
+  const sx = 4, sz = 4;
+  // counter
+  for (let x = -1; x <= 1; x++) {
+    blocks.push(<Block key={`sc-${x}`} position={[sx + x, 1, sz]} color={OAK_DARK} />);
+  }
+  // posts
+  blocks.push(<Block key="sp1" position={[sx - 1, 2, sz]} color={OAK_DARK} size={0.3} />);
+  blocks.push(<Block key="sp1b" position={[sx - 1, 3, sz]} color={OAK_DARK} size={0.3} />);
+  blocks.push(<Block key="sp2" position={[sx + 1, 2, sz]} color={OAK_DARK} size={0.3} />);
+  blocks.push(<Block key="sp2b" position={[sx + 1, 3, sz]} color={OAK_DARK} size={0.3} />);
+  // striped awning
+  for (let x = -1; x <= 1; x++) {
+    blocks.push(<Block key={`sa-${x}`} position={[sx + x, 4, sz]} color={x === 0 ? "#e8e8e8" : "#c43b3b"} />);
+    blocks.push(<Block key={`sa2-${x}`} position={[sx + x, 4, sz + 1]} color={x === 0 ? "#c43b3b" : "#e8e8e8"} />);
+  }
+  // wares on counter
+  blocks.push(<Block key="sw1" position={[sx - 1, 2, sz]} color="#fdc500" size={0.4} />);
+  blocks.push(<Block key="sw2" position={[sx, 2, sz]} color="#42e2f5" size={0.4} />);
+  blocks.push(<Block key="sw3" position={[sx + 1, 2, sz]} color="#ffafcc" size={0.4} />);
+
+  // --- Fenced garden with wheat rows ---
+  const gx = -5, gz = 5;
+  for (let x = 0; x < 4; x++) {
+    for (let z = 0; z < 3; z++) {
+      blocks.push(<Block key={`gd-${x}-${z}`} position={[gx + x, 0, gz + z]} color={DIRT} />);
+      // wheat stalks (small blocks)
+      if (z % 2 === 0) blocks.push(<Block key={`gw-${x}-${z}`} position={[gx + x, 1, gz + z]} color={WHEAT} size={0.5} />);
+    }
+  }
+  // fence posts around garden
+  for (let x = -1; x <= 4; x++) {
+    blocks.push(<Block key={`fnp1-${x}`} position={[gx + x, 1, gz - 1]} color={OAK_DARK} size={0.2} />);
+    blocks.push(<Block key={`fnp2-${x}`} position={[gx + x, 1, gz + 3]} color={OAK_DARK} size={0.2} />);
+  }
+  for (let z = -1; z <= 3; z++) {
+    blocks.push(<Block key={`fnp3-${z}`} position={[gx - 1, 1, gz + z]} color={OAK_DARK} size={0.2} />);
+    blocks.push(<Block key={`fnp4-${z}`} position={[gx + 4, 1, gz + z]} color={OAK_DARK} size={0.2} />);
+  }
+
+  // --- A small oak tree near the cottage ---
+  const tx = -1, tz = 4;
+  for (let y = 1; y <= 3; y++) blocks.push(<Block key={`tt-${y}`} position={[tx, y, tz]} color={OAK_DARK} />);
+  for (let x = -1; x <= 1; x++) for (let z = -1; z <= 1; z++) for (let y = 3; y <= 4; y++)
+    blocks.push(<Block key={`tl-${x}-${y}-${z}`} position={[tx + x, y, tz + z]} color={LEAF} />);
+  blocks.push(<Block key="tl-top" position={[tx, 5, tz]} color={LEAF} />);
+
+  // --- Signpost at path entrance ---
+  blocks.push(<Block key="sg-post" position={[2, 1, 9]} color={OAK_DARK} size={0.25} />);
+  blocks.push(<Block key="sg-board" position={[2, 2, 9]} color={OAK} size={0.9} />);
+
   return (
     <group position={base}>
-      {/* House walls */}
-      {Array.from({ length: 6 }).map((_, x) =>
-        Array.from({ length: 4 }).map((_, y) => (
-          <Block key={`w-${x}-${y}`} position={[x - 3, y + 1, -2]} color={x === 2 || x === 3 ? "#3a2a1d" : "#caa472"} />
-        ))
-      )}
-      {/* Roof */}
-      {Array.from({ length: 7 }).map((_, x) => (
-        <Block key={`r-${x}`} position={[x - 3.5, 5, -2]} color="#7a2e2e" />
-      ))}
-      {/* Bookshelf inside */}
-      <Block position={[-2, 1, -1]} color="#5a3a1d" />
-      <Block position={[-2, 2, -1]} color="#5a3a1d" />
-      {/* Sign */}
-      <Block position={[0, 1, 2]} color="#3a2a1d" size={0.8} />
+      {blocks}
       <Float floatIntensity={0.6}>
-        <Text position={[0, 3, 2]} fontSize={0.7} color="#fff" outlineColor="#000" outlineWidth={0.05}>
+        <Text position={[2, 3.4, 9]} fontSize={0.45} color="#fff" outlineColor="#000" outlineWidth={0.05}>
           ABOUT ME
         </Text>
       </Float>
+      <Sparkles count={20} scale={[12, 3, 12]} size={1.4} color="#fff5c2" speed={0.4} position={[0, 2, 0]} />
       <ZoneLabel position={[0, 8, 0]} color="#8ecae6">ABOUT VILLAGE</ZoneLabel>
     </group>
   );
