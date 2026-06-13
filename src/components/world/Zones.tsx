@@ -212,37 +212,162 @@ function CoreOrb({ position }: { position: [number, number, number] }) {
   );
 }
 
-/* PROJECTS BIOME — voxel dungeons */
+/* PROJECTS BIOME — a small voxel tech city: paved plaza, four themed
+ * buildings around a fountain, street lamps, benches, and signage.
+ * Aims for "realistic Minecraft town" instead of floating pillars. */
 export function Projects() {
   const base = ZONES_LOCAL.projects;
+
+  // Palette
+  const PAVE_LIGHT = "#b9b6ad";
+  const PAVE_DARK = "#8d8a82";
+  const PAVE_EDGE = "#5b5953";
+  const GRASS_TRIM = "#5fa85a";
+  const WATER = "#5fbfe0";
+  const LAMP_POST = "#2b2b2b";
+  const LAMP_BULB = "#ffe6a8";
+
   const projects = [
-    { name: "AI Lab",      color: "#42e2f5" },
-    { name: "Web City",    color: "#ffafcc" },
-    { name: "Data Towers", color: "#bde0fe" },
-    { name: "Game Arena",  color: "#fdc500" },
+    { name: "AI Lab",      color: "#42e2f5", accent: "#0a3d4a", roof: "#0e6b80", glass: "#9eefff" },
+    { name: "Web Studio",  color: "#ffafcc", accent: "#5a2741", roof: "#8a3559", glass: "#ffd6e6" },
+    { name: "Data Tower",  color: "#bde0fe", accent: "#23456b", roof: "#2f5d8f", glass: "#dceefd" },
+    { name: "Game Arena",  color: "#fdc500", accent: "#5a4400", roof: "#8a6a00", glass: "#fff1a8" },
   ];
+
+  const blocks: React.ReactElement[] = [];
+
+  // --- Plaza foundation (24x24 paved square with checker + grass border) ---
+  const R = 12;
+  for (let x = -R; x <= R; x++) {
+    for (let z = -R; z <= R; z++) {
+      const edge = Math.max(Math.abs(x), Math.abs(z));
+      if (edge === R) {
+        blocks.push(<Block key={`pe-${x}-${z}`} position={[x, 0, z]} color={PAVE_EDGE} />);
+      } else if (edge === R - 1) {
+        blocks.push(<Block key={`pg-${x}-${z}`} position={[x, 0, z]} color={GRASS_TRIM} />);
+      } else {
+        const checker = (x + z) % 2 === 0 ? PAVE_LIGHT : PAVE_DARK;
+        blocks.push(<Block key={`pv-${x}-${z}`} position={[x, 0, z]} color={checker} />);
+      }
+    }
+  }
+
+  // --- Central fountain (3x3 stone rim, water inside, 1-block jet) ---
+  for (let x = -2; x <= 2; x++) {
+    for (let z = -2; z <= 2; z++) {
+      const onRim = Math.max(Math.abs(x), Math.abs(z)) === 2;
+      if (onRim) blocks.push(<Block key={`fr-${x}-${z}`} position={[x, 1, z]} color="#9a9690" />);
+    }
+  }
+  for (let x = -1; x <= 1; x++) {
+    for (let z = -1; z <= 1; z++) {
+      blocks.push(
+        <mesh key={`fw-${x}-${z}`} position={[x, 1, z]} geometry={SHADED_BOX} receiveShadow>
+          <meshStandardMaterial color={WATER} transparent opacity={0.85} roughness={0.2} metalness={0.1} />
+        </mesh>
+      );
+    }
+  }
+  // jet
+  blocks.push(<Block key="jet" position={[0, 2, 0]} color={WATER} emissive={WATER} />);
+
+  // --- Walkways from plaza center to each building corner ---
+  // (handled by checker — buildings sit at corners)
+
+  // --- Street lamps at four mid-edges ---
+  const lampPositions: [number, number][] = [
+    [0, -R + 2], [0, R - 2], [-R + 2, 0], [R - 2, 0],
+  ];
+  lampPositions.forEach(([lx, lz], i) => {
+    blocks.push(<Block key={`lp1-${i}`} position={[lx, 1, lz]} color={LAMP_POST} size={0.25} />);
+    blocks.push(<Block key={`lp2-${i}`} position={[lx, 2, lz]} color={LAMP_POST} size={0.25} />);
+    blocks.push(<Block key={`lp3-${i}`} position={[lx, 3, lz]} color={LAMP_POST} size={0.25} />);
+    blocks.push(<Block key={`lb-${i}`} position={[lx, 3.6, lz]} color={LAMP_BULB} emissive={LAMP_BULB} size={0.55} />);
+  });
+
+  // --- Benches (two log seats + slab back) at cardinal sides ---
+  const benchSides: [number, number, number][] = [
+    [5, 0, -8], [-5, 0, -8], [5, 0, 8], [-5, 0, 8],
+  ];
+  benchSides.forEach(([bx, , bz], i) => {
+    for (let dx = -1; dx <= 1; dx++) {
+      blocks.push(<Block key={`bs-${i}-${dx}`} position={[bx + dx, 1, bz]} color="#7a4f29" size={0.85} />);
+    }
+  });
+
+  // --- Four buildings, one per corner ---
+  const cornerOffsets: [number, number][] = [
+    [-8, -8], [8, -8], [-8, 8], [8, 8],
+  ];
+
+  projects.forEach((p, i) => {
+    const [cx, cz] = cornerOffsets[i];
+    const w = 5, d = 5, h = 5; // base footprint + height
+    // Foundation (cobble)
+    for (let x = 0; x < w; x++) {
+      for (let z = 0; z < d; z++) {
+        blocks.push(<Block key={`bf-${i}-${x}-${z}`} position={[cx + x - 2, 1, cz + z - 2]} color="#7c8087" />);
+      }
+    }
+    // Walls (accent color), with a doorway facing plaza center
+    const doorSide = cx < 0 && cz < 0 ? "++" : cx > 0 && cz < 0 ? "-+" : cx < 0 && cz > 0 ? "+-" : "--";
+    for (let y = 2; y <= h; y++) {
+      for (let x = -2; x <= 2; x++) {
+        for (let z = -2; z <= 2; z++) {
+          const onEdge = Math.abs(x) === 2 || Math.abs(z) === 2;
+          if (!onEdge) continue;
+          // doorway (2-block tall) on the side facing the plaza
+          const isDoorFront =
+            (doorSide.includes("+") ? z === -2 : z === 2) && x === 0 && (y === 2 || y === 3);
+          const isDoorSide =
+            (doorSide[0] === "+" ? x === -2 : x === 2) && z === 0 && (y === 2 || y === 3);
+          if (isDoorFront || isDoorSide) continue;
+          // windows: middle ring y=3 at x=±1 or z=±1 (corners)
+          const isWindow = y === 3 && ((Math.abs(x) === 2 && Math.abs(z) === 1) || (Math.abs(z) === 2 && Math.abs(x) === 1));
+          if (isWindow) {
+            blocks.push(
+              <mesh key={`bg-${i}-${x}-${y}-${z}`} position={[cx + x, y, cz + z]} geometry={SHADED_BOX} castShadow receiveShadow>
+                <meshPhysicalMaterial color={p.glass} emissive={p.glass} emissiveIntensity={0.35} transmission={0.7} thickness={0.3} roughness={0.1} transparent opacity={0.7} />
+              </mesh>
+            );
+          } else {
+            blocks.push(<Block key={`bw-${i}-${x}-${y}-${z}`} position={[cx + x, y, cz + z]} color={p.accent} />);
+          }
+        }
+      }
+    }
+    // Pitched roof — two-step pyramid
+    for (let x = -2; x <= 2; x++) {
+      for (let z = -2; z <= 2; z++) {
+        blocks.push(<Block key={`br1-${i}-${x}-${z}`} position={[cx + x, h + 1, cz + z]} color={p.roof} />);
+      }
+    }
+    for (let x = -1; x <= 1; x++) {
+      for (let z = -1; z <= 1; z++) {
+        blocks.push(<Block key={`br2-${i}-${x}-${z}`} position={[cx + x, h + 2, cz + z]} color={p.roof} />);
+      }
+    }
+    // Roof beacon — themed glowing block
+    blocks.push(<Block key={`bc-${i}`} position={[cx, h + 3, cz]} color={p.color} emissive={p.color} size={0.7} />);
+
+    // Floating label above each building
+    blocks.push(
+      <Float key={`bl-${i}`} floatIntensity={0.5} speed={1.4}>
+        <Text position={[cx, h + 5, cz]} fontSize={0.7} color={p.color} outlineColor="#000" outlineWidth={0.05}>
+          {p.name}
+        </Text>
+      </Float>
+    );
+    blocks.push(
+      <Sparkles key={`sp-${i}`} count={14} scale={[3, 4, 3]} size={1.6} color={p.color} speed={0.8} position={[cx, h + 2, cz]} />
+    );
+  });
+
   return (
     <group position={base}>
-      {projects.map((p, i) => {
-        const x = (i - 1.5) * 7;
-        return (
-          <group key={p.name} position={[x, 0, 0]}>
-            {/* Pedestal */}
-            <Block position={[0, 1, 0]} color="#2c2f36" size={3} />
-            {/* Tower */}
-            {Array.from({ length: 5 }).map((_, y) => (
-              <Block key={y} position={[0, 3 + y, 0]} color={p.color} emissive={p.color} />
-            ))}
-            <Float floatIntensity={0.5} speed={1.5}>
-              <Text position={[0, 10, 0]} fontSize={0.7} color={p.color} outlineColor="#000" outlineWidth={0.05}>
-                {p.name}
-              </Text>
-            </Float>
-            <Sparkles count={20} scale={[3, 6, 3]} size={2} color={p.color} speed={1} position={[0, 5, 0]} />
-          </group>
-        );
-      })}
-      <ZoneLabel position={[0, 14, 0]} color="#a663cc">PROJECTS BIOME</ZoneLabel>
+      {blocks}
+      <Sparkles count={30} scale={[4, 3, 4]} size={1.8} color={WATER} speed={1.2} position={[0, 2.5, 0]} />
+      <ZoneLabel position={[0, 14, 0]} color="#a663cc">PROJECTS DISTRICT</ZoneLabel>
     </group>
   );
 }
